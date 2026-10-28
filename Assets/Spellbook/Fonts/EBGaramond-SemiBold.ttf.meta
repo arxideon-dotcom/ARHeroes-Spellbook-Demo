@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 8c74f972547e5834eb736f7920277004
+guid: 0ebe3eeca3f171e459f36ce6ef43de15
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Cormorant Garamond
+  - EB Garamond
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0

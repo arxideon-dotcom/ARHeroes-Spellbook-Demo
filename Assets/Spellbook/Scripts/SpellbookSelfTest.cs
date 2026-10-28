@@ -166,25 +166,46 @@ public class SpellbookSelfTest : MonoBehaviour
             }
             Check("Tab glyphs are flat ink (snowflake gold, 4 dimmed)", glyphsOk == 5);
 
-            // 8 завитков: по 2 у каждого внешнего угла (левая страница — слева, правая — справа)
-            var curls = new System.Collections.Generic.List<Transform>();
-            foreach (var t in FindObjectsByType<RectTransform>())
-                if (t.name.StartsWith("Curl_")) curls.Add(t);
+            // Рамки страниц: один слой над разворотом и под декором; стол и тень книги — позади разворота
+            var frames = GameObject.Find("PageFrames");
+            var framesSr = frames != null ? frames.GetComponent<SpriteRenderer>() : null;
             var leftCanvas = GameObject.Find("LeftPageCanvas");
             var rightCanvas = GameObject.Find("RightPageCanvas");
-            int curlsOk = 0;
-            foreach (var c in curls)
+            int decorOrder = GameObject.Find("LeftPageBack") != null
+                ? GameObject.Find("LeftPageBack").GetComponent<Canvas>().sortingOrder : int.MinValue;
+            Check("Page frame layer above the spread, below page decor",
+                framesSr != null && framesSr.sprite != null && framesSr.sprite.name == "UI_PageFrames" &&
+                framesSr.sortingOrder > spread.sortingOrder && framesSr.sortingOrder < decorOrder &&
+                Mathf.Abs(framesSr.bounds.size.x - b.size.x) < 0.01f);
+
+            var table = GameObject.Find("Table");
+            var tableSr = table != null ? table.GetComponent<SpriteRenderer>() : null;
+            var shadowGo = GameObject.Find("BookShadow");
+            var shadowSr = shadowGo != null ? shadowGo.GetComponent<SpriteRenderer>() : null;
+            bool tableCovers = false;
+            if (tableSr != null && cam != null)
             {
-                bool left = c.name.StartsWith("Curl_Left");
-                var pageCanvas = left ? leftCanvas : rightCanvas;
-                if (pageCanvas == null) continue;
-                Vector3 local = pageCanvas.transform.InverseTransformPoint(c.position);
-                bool outerSide = left ? local.x < 0f : local.x > 0f;
-                bool vertical = c.name.Contains("_Top_") ? local.y > 0f : local.y < 0f;
-                if (outerSide && vertical && b.Contains(new Vector3(c.position.x, c.position.y, b.center.z))) curlsOk++;
+                float dist = tableSr.transform.position.z - cam.transform.position.z;
+                Vector3 lo = cam.ViewportToWorldPoint(new Vector3(0f, 0f, dist));
+                Vector3 hi = cam.ViewportToWorldPoint(new Vector3(1f, 1f, dist));
+                Bounds tb = tableSr.bounds;
+                tableCovers = tb.min.x <= lo.x && tb.min.y <= lo.y && tb.max.x >= hi.x && tb.max.y >= hi.y;
             }
-            Check("8 corner curls, 2 at each outer page corner (found " + curls.Count + ")",
-                curls.Count == 8 && curlsOk == 8);
+            Check("Table fills the frame behind the book, contact shadow under it",
+                tableCovers && tableSr.sortingOrder < spread.sortingOrder &&
+                shadowSr != null && shadowSr.sprite != null && shadowSr.sortingOrder < spread.sortingOrder &&
+                shadowSr.sortingOrder > tableSr.sortingOrder);
+
+            // Шрифты по ролям и посадка текста на бумагу
+            Check("Fonts: titles IM FELL SC, description IM FELL Italic, stat labels EB Garamond",
+                FontIs("SpellTitle", "IMFellEnglishSC") && FontIs("SchoolTitle", "IMFellEnglishSC") &&
+                FontIs("Description", "IMFellEnglish-Italic") && FontIs("Stat_Mana/Label", "EBGaramond"));
+            Check("Title and description bend gently with the page",
+                Curved("SpellTitle") && Curved("Description") && Curved("SchoolTitle"));
+            var cartouche = GameObject.Find("StatsCartouche");
+            Check("Stats sit in a cartouche with ornamental dividers",
+                cartouche != null && IsSprite(cartouche.transform, "UI_Cartouche") &&
+                GameObject.Find("Stats") != null && GameObject.Find("Stats").transform.Find("Separator") != null);
 
             // Компас под статами, не шире строки статов; разделитель под второй строкой окон, шириной с сетку
             var compass = GameObject.Find("MarginCompass");
@@ -332,6 +353,22 @@ public class SpellbookSelfTest : MonoBehaviour
                 x1 = Mathf.Max(x1, w.x); y1 = Mathf.Max(y1, w.y);
             }
         return Rect.MinMaxRect(x0, y0, x1, y1);
+    }
+
+    private static bool FontIs(string path, string fontName)
+    {
+        var go = path.Contains("/") ? GameObject.Find(path.Split('/')[0])?.transform.Find(path.Split('/')[1])?.gameObject
+                                    : GameObject.Find(path);
+        var t = go != null ? go.GetComponent<Text>() : null;
+        return t != null && t.font != null && t.font.name.StartsWith(fontName);
+    }
+
+    // Изгиб — небольшой: дуга до 12 px холста, наклон по перспективе до 5°
+    private static bool Curved(string name)
+    {
+        var go = GameObject.Find(name);
+        var c = go != null ? go.GetComponent<PageTextCurve>() : null;
+        return c != null && c.enabled && c.arc > 0f && c.arc <= 12f && Mathf.Abs(c.lean) > 0f && Mathf.Abs(c.lean) <= 5f;
     }
 
     private static string ArgValue(string flag)

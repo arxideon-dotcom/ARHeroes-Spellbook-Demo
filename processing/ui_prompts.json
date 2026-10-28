@@ -86,11 +86,6 @@
     "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
     "prompt": "A round vignette illustration filling a circle: a cracked frozen lake surface with frost patterns and a cold light shining from below, sepia ink drawing with pale icy-blue magical glow and light watercolor, circular composition."
   },
-  "UI_ArtShards": {
-    "size": "1536x1024",
-    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
-    "prompt": "Scattered drawn ice shards and frost splinters flying outward in an arc, sepia ink outlines with fine hatching and a light pale icy-blue watercolor wash inside each shard, small snow dots, empty center."
-  },
   "UI_Schematic": {
     "size": "1024x1024",
     "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
@@ -124,5 +119,55 @@
     "size": "1024x1536",
     "edit_of": "frame 0 of the Ice Storm loop on magenta (/v1/images/edits)",
     "prompt": "Keep this exact ice storm tornado: the same funnel shape, pose, size, crystals at the bottom and placement in the frame. Redraw it in a new style: a detailed hand-drawn illustration from an old grimoire, fine dark sepia ink linework and pen hatching on the funnel, shards and crystals, with only the magic colored: a cold pale-cyan and icy-blue glow, translucent watercolor ice, white snow. Remove the glossy cartoon look and remove all purple and violet. No text, no letters. The background stays a COMPLETELY flat, uniform, solid magenta #FF00FF everywhere."
+  },
+  "UI_FrameCorner": {
+    "size": "1024x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "An ornate CORNER piece of a page border frame for the TOP-LEFT corner: two thin parallel ink lines run along the top edge and down the left edge and meet at the corner in an expressive filigree flourish with a small round rune medallion; the lines end cleanly after a short distance; the rest of the image is empty."
+  },
+  "UI_HeaderOrnament": {
+    "size": "1536x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A symmetrical ornamental header for a chapter title in an old grimoire: filigree scrolls and leaves on the left and on the right, a small snowflake rune at the top center, thin ink lines extending horizontally to both sides, a WIDE completely EMPTY space in the middle reserved for a title."
+  },
+  "UI_RuneStrip": {
+    "size": "1536x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A single horizontal row of eight small distinct runic glyphs made of simple straight angular strokes, evenly spaced with clear gaps between them, each glyph separate and complete."
+  },
+  "UI_Cartouche": {
+    "size": "1536x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A wide horizontal ornamental cartouche frame for a label in an old book: a thin double ink outline with scrolled ends and small corner flourishes, very wide and short, the inside is completely EMPTY."
+  },
+  "UI_StatDivider": {
+    "size": "1024x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A small vertical ornamental divider: a thin vertical ink line with a small diamond in the middle and two tiny scrolls at the top and bottom, tall and narrow."
+  },
+  "UI_Notes2": {
+    "size": "1024x1536",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A narrow vertical column of small illegible handwritten notes in faded sepia ink, cursive scribbles that look like old handwriting but contain no real readable words, about twelve short lines."
+  },
+  "UI_DiagramLattice": {
+    "size": "1024x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A small diagram of a hexagonal ice crystal lattice with construction lines, dotted circles, small arrows and dots, like a study in an old natural philosophy notebook."
+  },
+  "UI_DiagramStars": {
+    "size": "1024x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A small star chart diagram: dotted orbit circles, little star points connected by thin lines, a tiny crescent, like a page of an old astronomy notebook."
+  },
+  "UI_SketchHand": {
+    "size": "1024x1024",
+    "style": "Thin dark sepia ink drawing in the style of an old grimoire manuscript, fine pen lines, flat, no shading, no color fill, NOT 3D, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette.",
+    "prompt": "A small study sketch of an open hand with a swirl of snowflakes rising from the palm, fine pen hatching, like a margin drawing in an old manuscript."
+  },
+  "UI_Table": {
+    "size": "1536x1024",
+    "style": "",
+    "prompt": "Top-down view of a dark aged wooden table surface made of wide planks with subtle wood grain and a few faint scratches, muted dark brown, soft warm candle light pooling in the center, gradually darker toward the edges, no objects at all, painterly game background, NOT photorealistic, no text."
   }
 }

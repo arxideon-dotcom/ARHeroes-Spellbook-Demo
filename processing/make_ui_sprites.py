@@ -36,7 +36,12 @@ FRAME_SIZE = 512
 MAX_SIDE = {"UI_Banner": 768, "UI_BannerDim": 768, "UI_Divider": 768, "UI_ArtShards": 1024,
             "UI_Schematic": 768, "UI_MarginNotes": 768}
 TAB_GLYPHS = {"UI_InkSnowflake", "UI_InkGlyph0", "UI_InkGlyph1", "UI_InkGlyph2", "UI_InkGlyph3"}
-INK_LINES = {"UI_MarginCurl", "UI_MarginCompass", "UI_Schematic", "UI_MarginNotes", "UI_SketchCrystals"}
+INK_LINES = {"UI_MarginCurl", "UI_MarginCompass", "UI_Schematic", "UI_MarginNotes", "UI_SketchCrystals",
+             "UI_Cartouche", "UI_StatDivider", "UI_Notes2", "UI_DiagramLattice", "UI_DiagramStars"}
+# Filled drawings (white inside): ink strength comes from darkness, so the paper shows through
+INK_FROM_DARK = {"UI_SketchHand"}
+# Raw art used by make_page_frames.py, not a sprite of its own
+NOT_SPRITES = {"UI_FrameCorner", "UI_HeaderOrnament", "UI_RuneStrip", "UI_Table"}
 SQUARE = TAB_GLYPHS | {"UI_StatMana", "UI_StatPower", "UI_StatDuration", "UI_StatRange", "UI_MarginCompass"}
 # Medallion illustrations, cut to the frame's hole. The storm medallion sits on a pale ice backdrop.
 MEDALS = {"UI_Medal1": "UI_Medal1", "UI_Medal2": "UI_Medal2", "UI_Medal3": "UI_Medal3", "UI_MedalStorm": "UI_MedalStormInk"}
@@ -179,10 +184,15 @@ def main() -> int:
     names = [k for k in json.loads((Path(__file__).parent / "ui_prompts.json").read_text(encoding="utf-8"))
              if not k.startswith("_")]
     for name in names:
-        if name == "UI_FrameRing" or name in MEDALS.values():
+        if name == "UI_FrameRing" or name in MEDALS.values() or name in NOT_SPRITES:
             continue
         img = key(raw / f"{name}.png")
-        if name in TAB_GLYPHS:
+        if name in INK_FROM_DARK:
+            arr = np.array(img).astype(np.float32)
+            dark = np.clip((235 - arr[..., :3].mean(2)) / 180, 0, 1)
+            a = (arr[..., 3] / 255 * dark * 255).astype(np.uint8)
+            img = Image.new("RGBA", img.size, INK + (0,)); img.putalpha(Image.fromarray(a))
+        elif name in TAB_GLYPHS:
             img = ink_only(img, (255, 255, 255), widen=15, gain=1.5)
         elif name in INK_LINES:
             img = ink_only(img, INK, widen=3, gain=1.5)

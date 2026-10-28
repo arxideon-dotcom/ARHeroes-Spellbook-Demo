@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 806e23aa29d53a944892075d5e4ca65a
+guid: 134a56c1a77b10b47ad9c9b40e800706
 TrueTypeFontImporter:
   externalObjects: {}
   serializedVersion: 4
@@ -9,7 +9,7 @@ TrueTypeFontImporter:
   characterPadding: 1
   includeFontData: 1
   fontNames:
-  - Cormorant Garamond
+  - IM FELL English SC
   fallbackFontReferences: []
   customCharacters: 
   fontRenderingMode: 0
