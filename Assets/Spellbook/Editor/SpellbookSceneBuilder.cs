@@ -1,6 +1,6 @@
 // ARHeroes-Spellbook-Demo — hackathon build (Oct 2026).
-// Собирает сцену-каркас книги заклинаний на плейсхолдерах и Windows-сборку.
-// Меню: Spellbook ▸ Build Placeholder Scene / Build Windows Player.
+// Собирает сцену книги заклинаний на развороте v8 и Windows-сборку.
+// Меню: Spellbook ▸ Build Scene / Build Windows Player.
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -10,38 +10,36 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem.UI;
 using UnityEngine.Rendering;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.UI;
 
 public static class SpellbookSceneBuilder
 {
     public const string SourceScenePath = "Assets/Scenes/SampleScene.unity";
     public const string ScenePath = "Assets/Spellbook/Scenes/SpellbookScene.unity";
-    public const string FramesFolder = "Assets/Spellbook/Frames";
     public const string ArtFolder = "Assets/Spellbook/Art";
+    public const string SpreadPath = ArtFolder + "/Spellbook_Spread_v8.png";
     public const string BuildPath = "Builds/Windows/ARHeroes-Spellbook-Demo.exe";
+    private const string SpriteMaterialPath =
+        "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat";
 
-    private const int FrameSize = 256;
+    // 1680x964 px разворота -> 2.33 x 1.34 юнита, примерно как прежняя обложка
+    private const float SpreadPixelsPerUnit = 720f;
 
-    // Плейсхолдер-цвета кадров: оттенки льда, чтобы смена кадров была заметна
-    private static readonly Color32[] FrameColors =
-    {
-        new Color32(40, 90, 200, 255),
-        new Color32(70, 190, 230, 255),
-        new Color32(220, 245, 255, 255),
-        new Color32(120, 80, 210, 255),
-    };
+    // Ровные области страниц в юнитах разворота (центр спрайта = 0,0),
+    // с отступами от краёв, колец и корешка. Сняты по превью 2560x1440.
+    public static readonly Vector2 PageSize = new Vector2(0.625f, 0.875f);
+    public static readonly Vector2 LeftPageCenter = new Vector2(-0.4472f, 0.0625f);
+    public static readonly Vector2 RightPageCenter = new Vector2(0.4278f, 0.0625f);
 
-    private static readonly Color Parchment = new Color(0.93f, 0.86f, 0.68f);
-    private static readonly Color Leather = new Color(0.22f, 0.11f, 0.06f);
     private static readonly Color Background = new Color(0.05f, 0.04f, 0.05f);
     private static readonly Color WarmLight = new Color(1f, 0.82f, 0.6f);
 
-    [MenuItem("Spellbook/Build Placeholder Scene")]
+    [MenuItem("Spellbook/Build Scene")]
     public static void BuildScene()
     {
-        Sprite[] frames = CreatePlaceholderFrames();
-        Material paper = CreateMaterial("PLACEHOLDER_Parchment", Parchment);
-        Material cover = CreateMaterial("PLACEHOLDER_Cover", Leather);
+        Sprite spread = ImportSpread();
+        var spriteMaterial = AssetDatabase.LoadAssetAtPath<Material>(SpriteMaterialPath);
 
         // SampleScene сохраняется как SpellbookScene, дальше правим копию
         var scene = EditorSceneManager.OpenScene(SourceScenePath, OpenSceneMode.Single);
@@ -58,20 +56,22 @@ public static class SpellbookSceneBuilder
         SetupCamera();
         SetupLights();
 
+        // Перспектива уже нарисована в развороте, поэтому книга стоит лицом к камере без наклона
         var book = new GameObject("Book");
-        // Книга стоит на «пюпитре»: верх слегка отклонён от камеры
-        book.transform.SetPositionAndRotation(Vector3.zero, Quaternion.Euler(25f, 0f, 0f));
+        book.transform.SetPositionAndRotation(Vector3.zero, Quaternion.identity);
 
-        var coverQuad = CreateQuad("PLACEHOLDER_Cover", book.transform, cover);
-        // Обложка заметно позади: внутренние края страниц при развороте уходят назад на ~0.06
-        coverQuad.transform.localPosition = new Vector3(0f, 0f, 0.12f);
-        coverQuad.transform.localScale = new Vector3(2.3f, 1.55f, 1f);
+        var spreadGo = new GameObject("Spread");
+        spreadGo.transform.SetParent(book.transform, false);
+        var spreadRenderer = spreadGo.AddComponent<SpriteRenderer>();
+        spreadRenderer.sprite = spread;
+        if (spriteMaterial != null) spreadRenderer.sharedMaterial = spriteMaterial;
+        spreadRenderer.sortingOrder = 0;
 
-        var left = CreatePage("PLACEHOLDER_PageLeft", book.transform, -0.535f, -6f, paper);
-        var right = CreatePage("PLACEHOLDER_PageRight", book.transform, 0.535f, 6f, paper);
+        var left = CreatePage("PageLeft", book.transform, LeftPageCenter);
+        var right = CreatePage("PageRight", book.transform, RightPageCenter);
 
         CreateDescription(left.transform);
-        LoopPlayer player = CreateAnimation(right.transform, frames);
+        LoopPlayer player = CreateArtSlot(right.transform, spriteMaterial);
 
         CreateUi(player);
         CreateEventSystem();
@@ -102,54 +102,31 @@ public static class SpellbookSceneBuilder
         return report;
     }
 
-    private static Sprite[] CreatePlaceholderFrames()
+    private static Sprite ImportSpread()
     {
-        var sprites = new Sprite[FrameColors.Length];
-        for (int i = 0; i < FrameColors.Length; i++)
+        var importer = (TextureImporter)AssetImporter.GetAtPath(SpreadPath);
+        if (importer == null)
         {
-            string path = FramesFolder + "/PLACEHOLDER_" + i + ".png";
-            if (!File.Exists(path))
-            {
-                var tex = new Texture2D(FrameSize, FrameSize, TextureFormat.RGBA32, false);
-                var pixels = new Color32[FrameSize * FrameSize];
-                for (int p = 0; p < pixels.Length; p++) pixels[p] = FrameColors[i];
-                tex.SetPixels32(pixels);
-                tex.Apply();
-                File.WriteAllBytes(path, tex.EncodeToPNG());
-                Object.DestroyImmediate(tex);
-                AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
-            }
-
-            var importer = (TextureImporter)AssetImporter.GetAtPath(path);
-            if (importer.textureType != TextureImporterType.Sprite ||
-                importer.spriteImportMode != SpriteImportMode.Single ||
-                !Mathf.Approximately(importer.spritePixelsPerUnit, FrameSize))
-            {
-                importer.textureType = TextureImporterType.Sprite;
-                importer.spriteImportMode = SpriteImportMode.Single;
-                importer.spritePixelsPerUnit = FrameSize;
-                importer.alphaIsTransparency = true;
-                importer.mipmapEnabled = false;
-                importer.SaveAndReimport();
-            }
-            sprites[i] = AssetDatabase.LoadAssetAtPath<Sprite>(path);
+            Debug.LogError("[Spellbook] Spread texture not found: " + SpreadPath);
+            return null;
         }
-        return sprites;
-    }
-
-    private static Material CreateMaterial(string name, Color color)
-    {
-        string path = ArtFolder + "/" + name + ".mat";
-        var mat = AssetDatabase.LoadAssetAtPath<Material>(path);
-        if (mat == null)
+        if (importer.textureType != TextureImporterType.Sprite ||
+            importer.spriteImportMode != SpriteImportMode.Single ||
+            !Mathf.Approximately(importer.spritePixelsPerUnit, SpreadPixelsPerUnit) ||
+            importer.maxTextureSize != 2048 ||
+            importer.textureCompression != TextureImporterCompression.CompressedHQ)
         {
-            mat = new Material(Shader.Find("Universal Render Pipeline/Lit"));
-            AssetDatabase.CreateAsset(mat, path);
+            importer.textureType = TextureImporterType.Sprite;
+            importer.spriteImportMode = SpriteImportMode.Single;
+            importer.spritePixelsPerUnit = SpreadPixelsPerUnit;
+            importer.alphaIsTransparency = true;
+            importer.mipmapEnabled = false;
+            importer.wrapMode = TextureWrapMode.Clamp;
+            importer.maxTextureSize = 2048;
+            importer.textureCompression = TextureImporterCompression.CompressedHQ;
+            importer.SaveAndReimport();
         }
-        mat.SetColor("_BaseColor", color);
-        mat.SetFloat("_Smoothness", 0.1f);
-        EditorUtility.SetDirty(mat);
-        return mat;
+        return AssetDatabase.LoadAssetAtPath<Sprite>(SpreadPath);
     }
 
     private static void SetupCamera()
@@ -160,12 +137,14 @@ public static class SpellbookSceneBuilder
             cam = new GameObject("Main Camera").AddComponent<Camera>();
             cam.tag = "MainCamera";
         }
-        // Чуть сбоку и сверху, смотрит в центр разворота
-        cam.transform.position = new Vector3(0.45f, 0.75f, -3.1f);
-        cam.transform.LookAt(new Vector3(0f, 0.05f, 0f));
+        // Прямо перед разворотом: сверху остаётся место под заголовок, снизу под кнопки
+        cam.transform.position = new Vector3(0f, 0f, -2.6f);
+        cam.transform.LookAt(Vector3.zero);
         cam.fieldOfView = 40f;
         cam.clearFlags = CameraClearFlags.SolidColor;
         cam.backgroundColor = Background;
+        // Разворот — готовая живопись: тонмаппинг из Global Volume гасил светлые тона пергамента на ~15%
+        cam.GetUniversalAdditionalCameraData().renderPostProcessing = false;
 
         RenderSettings.skybox = null;
         RenderSettings.ambientMode = AmbientMode.Flat;
@@ -190,27 +169,13 @@ public static class SpellbookSceneBuilder
         candle.transform.position = new Vector3(-1.2f, 1.0f, -1.2f);
     }
 
-    private static GameObject CreatePage(string name, Transform book, float x, float yaw, Material paper)
+    private static GameObject CreatePage(string name, Transform book, Vector2 center)
     {
-        // Корень страницы без масштаба, чтобы дети (текст, спрайт) не искажались
+        // Пустой якорь ровной области страницы, без масштаба, чтобы дети (текст, спрайт) не искажались
         var page = new GameObject(name);
         page.transform.SetParent(book, false);
-        page.transform.localPosition = new Vector3(x, 0f, 0f);
-        page.transform.localRotation = Quaternion.Euler(0f, yaw, 0f);
-
-        var quad = CreateQuad("Paper", page.transform, paper);
-        quad.transform.localScale = new Vector3(1.05f, 1.4f, 1f);
+        page.transform.localPosition = new Vector3(center.x, center.y, 0f);
         return page;
-    }
-
-    private static GameObject CreateQuad(string name, Transform parent, Material mat)
-    {
-        var quad = GameObject.CreatePrimitive(PrimitiveType.Quad);
-        quad.name = name;
-        Object.DestroyImmediate(quad.GetComponent<Collider>());
-        quad.transform.SetParent(parent, false);
-        quad.GetComponent<MeshRenderer>().sharedMaterial = mat;
-        return quad;
     }
 
     private static void CreateDescription(Transform page)
@@ -219,30 +184,35 @@ public static class SpellbookSceneBuilder
         canvasGo.transform.SetParent(page, false);
         var canvas = canvasGo.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
+        // Поверх разворота (у него sortingOrder 0)
+        canvas.sortingOrder = 2;
         var rt = (RectTransform)canvasGo.transform;
-        rt.sizeDelta = new Vector2(900f, 1200f);
-        rt.localScale = Vector3.one * 0.001f;
+        const float canvasWidth = 900f;
+        rt.sizeDelta = new Vector2(canvasWidth, canvasWidth * PageSize.y / PageSize.x);
+        rt.localScale = Vector3.one * (PageSize.x / canvasWidth);
         rt.localPosition = new Vector3(0f, 0f, -0.005f);
 
-        var text = CreateText("PLACEHOLDER_Description", canvasGo.transform, 56, new Color(0.25f, 0.15f, 0.08f));
+        var text = CreateText("PLACEHOLDER_Description", canvasGo.transform, 56, new Color(0.23f, 0.13f, 0.07f));
         text.alignment = TextAnchor.UpperLeft;
         text.text = "Ледяная буря\n\nPLACEHOLDER: описание заклинания.\n\n" +
                     "Призывает вихрь ледяных осколков, который замедляет врагов в области.";
-        Stretch((RectTransform)text.transform, 60f);
+        Stretch((RectTransform)text.transform, 30f);
     }
 
-    private static LoopPlayer CreateAnimation(Transform page, Sprite[] frames)
+    private static LoopPlayer CreateArtSlot(Transform page, Material spriteMaterial)
     {
-        var go = new GameObject("PLACEHOLDER_SpellAnimation");
+        // Место под арт заклинания: кадров пока нет, спрайт пустой.
+        // Кадры ложатся в ровную область PageSize (0.625 x 0.875 юнита) с центром на этом объекте.
+        var go = new GameObject("SpellArt");
         go.transform.SetParent(page, false);
-        go.transform.localPosition = new Vector3(0f, 0.05f, -0.01f);
-        go.transform.localScale = Vector3.one * 0.85f;
+        go.transform.localPosition = new Vector3(0f, 0f, -0.01f);
 
         var sr = go.AddComponent<SpriteRenderer>();
-        sr.sprite = frames[0];
+        if (spriteMaterial != null) sr.sharedMaterial = spriteMaterial;
+        sr.sortingOrder = 1;
 
         var player = go.AddComponent<LoopPlayer>();
-        player.frames = frames;
+        player.frames = new Sprite[0];
         player.fps = 12f;
         player.loop = true;
         // Цикл запускается кнопкой «Проиграть цикл»

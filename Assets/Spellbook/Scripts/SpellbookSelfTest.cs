@@ -5,7 +5,6 @@
 // Без аргумента ничего не делает.
 using System;
 using System.Collections;
-using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using UnityEngine;
@@ -63,38 +62,42 @@ public class SpellbookSelfTest : MonoBehaviour
         Check("LoopPlayer found", player != null && spriteRenderer != null);
         if (player == null || spriteRenderer == null) { Finish(); yield break; }
 
-        Check("4 frames, fps 12, loop on",
-            player.frames != null && player.frames.Length == 4 && Mathf.Approximately(player.fps, 12f) && player.loop);
+        // Место под арт: кадров пока нет
+        Check("Art slot is empty, fps 12, loop on",
+            player.frames != null && player.frames.Length == 0 && spriteRenderer.sprite == null &&
+            Mathf.Approximately(player.fps, 12f) && player.loop);
 
         var cam = Camera.main;
-        Check("Right page visible to camera", cam != null && IsVisible(cam, spriteRenderer.bounds));
+        var spreadGo = GameObject.Find("Spread");
+        var spread = spreadGo != null ? spreadGo.GetComponent<SpriteRenderer>() : null;
+        Check("Spread sprite present and visible to camera",
+            spread != null && spread.sprite != null && cam != null && IsVisible(cam, spread.bounds));
 
-        // До нажатия кадр стоит на первом
-        Sprite idle = spriteRenderer.sprite;
-        yield return new WaitForSeconds(0.5f);
-        Check("Idle before Play shows frame 0 and does not change",
-            idle == player.frames[0] && spriteRenderer.sprite == idle);
-
-        // «Проиграть цикл»
-        Click("Button_PlayLoop");
-        var seen = new HashSet<Sprite>();
-        float until = Time.unscaledTime + 1.2f;
-        while (Time.unscaledTime < until)
+        if (spread != null)
         {
-            seen.Add(spriteRenderer.sprite);
-            yield return null;
+            Bounds b = spread.bounds;
+            float centre = b.center.x;
+            Vector3 slot = player.transform.position;
+            Check("Art slot sits on the right page", slot.x > centre && b.Contains(new Vector3(slot.x, slot.y, b.center.z)));
+
+            var description = GameObject.Find("PLACEHOLDER_Description");
+            var descriptionText = description != null ? description.GetComponent<Text>() : null;
+            Vector3 d = description != null ? description.transform.position : Vector3.zero;
+            Check("Description text sits on the left page",
+                descriptionText != null && !string.IsNullOrEmpty(descriptionText.text) &&
+                d.x < centre && b.Contains(new Vector3(d.x, d.y, b.center.z)));
         }
-        Check("Play cycles frames (distinct seen: " + seen.Count + ")", seen.Count == player.frames.Length);
 
         string shot = Path.ChangeExtension(_reportPath, ".png");
         ScreenCapture.CaptureScreenshot(shot);
         yield return new WaitForSeconds(0.5f);
 
-        // «Повтор» — сразу первый кадр
+        // Кнопки работают и с пустым слотом: ни ошибок, ни спрайта
+        Click("Button_PlayLoop");
+        yield return new WaitForSeconds(0.3f);
         Click("Button_Replay");
-        Check("Replay restarts from frame 0", spriteRenderer.sprite == player.frames[0]);
-        yield return new WaitForSeconds(0.2f);
-        Check("Animation continues after Replay", spriteRenderer.sprite != player.frames[0]);
+        yield return new WaitForSeconds(0.3f);
+        Check("Play/Replay on the empty slot keep it empty", spriteRenderer.sprite == null);
 
         // «Перелистнуть» неактивна
         var flip = FindButton("Button_FlipPage");
