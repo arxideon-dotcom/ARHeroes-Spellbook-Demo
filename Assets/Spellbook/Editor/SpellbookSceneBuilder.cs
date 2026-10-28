@@ -48,9 +48,10 @@ public static class SpellbookSceneBuilder
     private const float CanvasWidth = 900f;
     private const float CanvasHeight = CanvasWidth * 0.875f / 0.625f;
 
-    // Анимация на правой странице: верхние ~57% рабочей области (по согласованному макету)
-    private const float ArtTopPx = 635f;
-    private const float ArtBottomPx = -85f;
+    // Анимация на правой странице, в 1.3 раза крупнее прежних 720 px: кадр 936 px холста.
+    // Видимая часть всех 36 кадров — 784 x 893 px вокруг центра 313: от 760 (ниже верха бумаги) до -133
+    private const float ArtTopPx = 313f + 468f;
+    private const float ArtBottomPx = 313f - 468f;
     private const float MiniRing = 470f;
     private const float MiniSpacing = 228f;
 
@@ -59,13 +60,13 @@ public static class SpellbookSceneBuilder
     private const int ArtOrder = 2;
     private const int FrontOrder = 3;
 
-    public const string SpellName = "Ледяная буря";
-    public const string SpellDescription =
-        "Призывает вихрь ледяных осколков, который замедляет врагов в области.";
+    // Тексты продукта — на английском
+    public const string SpellName = "Ice Storm";
+    public const string SpellDescription = "Summons a vortex of ice shards that slows enemies in an area.";
     // Значений статов в данных демо нет: так и пишем
-    public const string StatPlaceholder = "не задано";
-    // Название школы автор ещё не задал; заглушка видна явно
-    public const string SchoolTitlePlaceholder = "НАЗВАНИЕ ШКОЛЫ";
+    public const string StatPlaceholder = "Not set";
+    // Рабочее название школы от автора
+    public const string SchoolTitle = "Ice Magic";
 
     private static readonly Color Ink = new Color(0.23f, 0.13f, 0.07f);
     private static readonly Color RedInk = new Color(0.36f, 0.1f, 0.06f);
@@ -305,29 +306,34 @@ public static class SpellbookSceneBuilder
         return text;
     }
 
-    private static void CreateCorners(Transform canvas)
+    private static void CreateCorners(Transform canvas, bool clearTop)
     {
         // Угловые орнаменты; спрайт нарисован для левого верхнего угла
         Sprite flourish = Ui("UI_CornerFlourish");
         var corners = new[] { (-1, 1, "TL"), (1, 1, "TR"), (-1, -1, "BL"), (1, -1, "BR") };
         foreach (var (sx, sy, tag) in corners)
         {
-            var img = CreateImage("Corner_" + tag, canvas, flourish, new Vector2(sx * 395f, sy * 575f),
+            // clearTop: верхние углы уходят в поле бумаги, освобождая место под анимацию
+            var pos = clearTop && sy > 0 ? new Vector2(sx * 470f, 700f) : new Vector2(sx * 395f, sy * 575f);
+            var img = CreateImage("Corner_" + tag, canvas, flourish, pos,
                                   new Vector2(90f, 90f), new Color(1f, 1f, 1f, 0.75f));
             img.rectTransform.localScale = new Vector3(-sx, sy, 1f);
         }
     }
 
-    private static void CreateCurls(Transform canvas, float outer, string page)
+    private static void CreateCurls(Transform canvas, float outer, string page, bool clearTop)
     {
         // По 2 завитка у каждого внешнего угла страницы: в поле над/под углом и в боковом поле
         Sprite curl = Ui("UI_MarginCurl");
         var size = ByWidth(curl, 110f);
         foreach (var (sy, tag) in new[] { (1f, "Top"), (-1f, "Bottom") })
         {
+            bool sideOnly = clearTop && sy > 0;
             var along = CreateImage("Curl_" + page + "_" + tag + "_Edge", canvas, curl,
-                                    new Vector2(outer * 360f, sy * 680f), size, new Color(1f, 1f, 1f, 0.85f));
+                                    sideOnly ? new Vector2(outer * 500f, 340f) : new Vector2(outer * 360f, sy * 680f),
+                                    size, new Color(1f, 1f, 1f, 0.85f));
             along.rectTransform.localScale = new Vector3(-outer, sy, 1f);
+            if (sideOnly) along.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 90f);
             var side = CreateImage("Curl_" + page + "_" + tag + "_Side", canvas, curl,
                                    new Vector2(outer * 495f, sy * 520f), size, new Color(1f, 1f, 1f, 0.85f));
             side.rectTransform.localRotation = Quaternion.Euler(0f, 0f, 90f);
@@ -358,7 +364,7 @@ public static class SpellbookSceneBuilder
                         active ? InkGold : new Color(Ink.r, Ink.g, Ink.b, 0.8f));
         }
 
-        CreateLabel("SchoolTitle", canvas, SchoolTitlePlaceholder, 62, FontStyle.Bold, new Vector2(0f, 568f),
+        CreateLabel("SchoolTitle", canvas, SchoolTitle, 62, FontStyle.Bold, new Vector2(0f, 568f),
                     new Vector2(820f, 80f), TextAnchor.MiddleCenter, RedInk);
         Decor("TitleRule", canvas, "UI_Divider", new Vector2(0f, 515f), 640f, 1f).preserveAspect = false;
 
@@ -382,8 +388,8 @@ public static class SpellbookSceneBuilder
         Decor("Margin_Notes", canvas, "UI_MarginNotes", new Vector2(-250f, -690f), 250f, 0.6f);
         Decor("Sketch_Peak", canvas, "UI_SketchPeak", new Vector2(330f, -650f), 120f, 0.75f);
 
-        CreateCorners(canvas);
-        CreateCurls(canvas, -1f, "Left");
+        CreateCorners(canvas, false);
+        CreateCurls(canvas, -1f, "Left", false);
         CreateLabel("PageNumber", canvas, "1", 40, FontStyle.Italic, new Vector2(0f, -690f),
                     new Vector2(200f, 50f), TextAnchor.MiddleCenter, Ink);
     }
@@ -429,25 +435,25 @@ public static class SpellbookSceneBuilder
         Decor("ArtShards", back, "UI_ArtShards", new Vector2(0f, artY + 20f), 900f, 0.9f);
 
         // Лицевой слой — только ниже области анимации, движущиеся части ничем не закрыты
-        var banner = CreateImage("TitleBanner", canvas, Ui("UI_Banner"), new Vector2(0f, -185f), new Vector2(740f, 176f), Color.white);
+        var banner = CreateImage("TitleBanner", canvas, Ui("UI_Banner"), new Vector2(0f, -228f), new Vector2(720f, 150f), Color.white);
         banner.preserveAspect = false;
-        CreateLabel("SpellTitle", banner.transform, SpellName, 74, FontStyle.Bold, new Vector2(0f, 10f),
-                    new Vector2(580f, 84f), TextAnchor.MiddleCenter, RedInk);
+        CreateLabel("SpellTitle", banner.transform, SpellName, 70, FontStyle.Bold, new Vector2(0f, 9f),
+                    new Vector2(560f, 80f), TextAnchor.MiddleCenter, RedInk);
 
-        var description = CreateLabel("Description", canvas, SpellDescription, 50, FontStyle.Italic,
-                                      new Vector2(0f, -305f), new Vector2(820f, 140f), TextAnchor.MiddleCenter, Ink);
-        description.lineSpacing = 1.05f;
+        var description = CreateLabel("Description", canvas, SpellDescription, 48, FontStyle.Italic,
+                                      new Vector2(0f, -365f), new Vector2(820f, 112f), TextAnchor.MiddleCenter, Ink);
+        description.lineSpacing = 1.0f;
 
-        Decor("StatsRule", canvas, "UI_Divider", new Vector2(0f, -392f), 760f, 1f);
+        Decor("StatsRule", canvas, "UI_Divider", new Vector2(0f, -445f), 760f, 1f);
 
         var stats = new GameObject("Stats", typeof(RectTransform));
-        Place(stats, canvas, new Vector2(0f, -485f), new Vector2(872f, 130f));
+        Place(stats, canvas, new Vector2(0f, -530f), new Vector2(872f, 130f));
         var rows = new[]
         {
-            ("Stat_Mana", "UI_StatMana", "Мана"),
-            ("Stat_Power", "UI_StatPower", "Сила"),
-            ("Stat_Duration", "UI_StatDuration", "Длительность"),
-            ("Stat_Range", "UI_StatRange", "Дальность"),
+            ("Stat_Mana", "UI_StatMana", "Mana"),
+            ("Stat_Power", "UI_StatPower", "Power"),
+            ("Stat_Duration", "UI_StatDuration", "Duration"),
+            ("Stat_Range", "UI_StatRange", "Range"),
         };
         for (int i = 0; i < rows.Length; i++)
         {
@@ -467,16 +473,17 @@ public static class SpellbookSceneBuilder
         }
 
         // Компас-диаграмма под строкой статов
-        Decor("MarginCompass", canvas, "UI_MarginCompass", new Vector2(0f, -605f), 90f, 0.9f);
+        Decor("MarginCompass", canvas, "UI_MarginCompass", new Vector2(0f, -640f), 64f, 0.9f);
 
         // Заметки во внешнем поле, ниже линии вихря: широкое место бумаги, анимацию не задевают
         Decor("Margin_Notes", canvas, "UI_MarginNotes", new Vector2(540f, -250f), 150f, 0.55f);
         Sprite crystals = Ui("UI_SketchCrystals");
         CreateImage("Sketch_Crystals", canvas, crystals, new Vector2(525f, 150f), ByHeight(crystals, 260f), new Color(1f, 1f, 1f, 0.55f));
 
-        CreateCorners(canvas);
-        CreateCurls(canvas, 1f, "Right");
-        CreateLabel("PageNumber", canvas, "2", 40, FontStyle.Italic, new Vector2(0f, -690f),
+        // Верхние орнаменты правой страницы — в полях, мимо крупной анимации
+        CreateCorners(canvas, true);
+        CreateCurls(canvas, 1f, "Right", true);
+        CreateLabel("PageNumber", canvas, "2", 40, FontStyle.Italic, new Vector2(0f, -720f),
                     new Vector2(200f, 50f), TextAnchor.MiddleCenter, Ink);
     }
 
@@ -555,14 +562,14 @@ public static class SpellbookSceneBuilder
         // Небольшие кнопки в стиле книги: бронзовая рамка, пергамент, шрифт страниц
         var resources = new DefaultControls.Resources { standard = Ui("UI_ButtonPlate") };
 
-        var play = CreateButton(ui.transform, resources, "Button_PlayLoop", "Проиграть цикл", -202f);
+        var play = CreateButton(ui.transform, resources, "Button_PlayLoop", "Play", -202f);
         UnityEventTools.AddPersistentListener(play.onClick, player.Play);
 
-        var replay = CreateButton(ui.transform, resources, "Button_Replay", "Повтор", 0f);
+        var replay = CreateButton(ui.transform, resources, "Button_Replay", "Replay", 0f);
         UnityEventTools.AddPersistentListener(replay.onClick, player.Replay);
 
         // Страниц 2–3 пока нет
-        var flip = CreateButton(ui.transform, resources, "Button_FlipPage", "Перелистнуть", 202f);
+        var flip = CreateButton(ui.transform, resources, "Button_FlipPage", "Next Page", 202f);
         flip.interactable = false;
         flip.GetComponentInChildren<Text>().color = new Color(0.43f, 0.35f, 0.27f);
     }

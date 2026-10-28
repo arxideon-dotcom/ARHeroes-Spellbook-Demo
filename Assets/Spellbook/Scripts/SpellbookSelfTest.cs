@@ -82,7 +82,11 @@ public class SpellbookSelfTest : MonoBehaviour
             Vector3 slot = player.transform.position;
             Check("Art slot sits on the right page", slot.x > centre && b.Contains(new Vector3(slot.x, slot.y, b.center.z)));
 
-            Bounds art = spriteRenderer.bounds;
+            // Видимая часть анимации — по контурам всех 36 кадров, а не по прямоугольнику кадра 0
+            Rect content = AnimationContent(player, spriteRenderer);
+            _report.AppendLine("  animation content (world): " + content.ToString("F3"));
+            Bounds art = new Bounds(new Vector3(content.center.x, content.center.y, spriteRenderer.bounds.center.z),
+                                    new Vector3(content.width, content.height, 0.01f));
             Check("Art fits inside the spread", b.Contains(new Vector3(art.min.x, art.min.y, b.center.z)) &&
                                                 b.Contains(new Vector3(art.max.x, art.max.y, b.center.z)));
 
@@ -111,7 +115,7 @@ public class SpellbookSelfTest : MonoBehaviour
                 string expected = i == 0 ? "UI_MedalStorm" : "UI_Medal" + i;
                 bool filled = artImage != null && artImage.sprite != null && artImage.sprite.name == expected;
                 bool ok = i == 0
-                    ? glow && filled && labelText != null && labelText.text == "Ледяная буря"
+                    ? glow && filled && labelText != null && labelText.text == "Ice Storm"
                     : !glow && filled && labelText == null;
                 if (ok) windowsOk++;
             }
@@ -124,8 +128,8 @@ public class SpellbookSelfTest : MonoBehaviour
             // Правая страница: баннер с названием, описание, 4 стата
             var spellTitle = GameObject.Find("SpellTitle");
             var spellTitleText = spellTitle != null ? spellTitle.GetComponent<Text>() : null;
-            Check("Title banner 'Ледяная буря' on the right page, below the art",
-                spellTitleText != null && spellTitleText.text == "Ледяная буря" && OnPage(b, spellTitle.transform, true) &&
+            Check("Title banner 'Ice Storm' on the right page, below the art",
+                spellTitleText != null && spellTitleText.text == "Ice Storm" && OnPage(b, spellTitle.transform, true) &&
                 spellTitle.transform.position.y < art.min.y);
 
             var description = GameObject.Find("Description");
@@ -214,11 +218,21 @@ public class SpellbookSelfTest : MonoBehaviour
                 {
                     var corners = new Vector3[4];
                     g.rectTransform.GetWorldCorners(corners);
-                    var r = Rect.MinMaxRect(corners[0].x, corners[0].y, corners[2].x, corners[2].y);
+                    // Повёрнутые элементы (боковые завитки): берём рамку по всем четырём углам
+                    float rx0 = Mathf.Min(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
+                    float rx1 = Mathf.Max(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
+                    float ry0 = Mathf.Min(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
+                    float ry1 = Mathf.Max(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
+                    var r = Rect.MinMaxRect(rx0, ry0, rx1, ry1);
                     var a = Rect.MinMaxRect(art.min.x, art.min.y, art.max.x, art.max.y);
                     if (r.Overlaps(a)) { overlapping++; _report.AppendLine("  over the animation: " + g.name); }
                 }
-            Check("No front decor or text over the animation (overlapping: " + overlapping + ")", overlapping == 0);
+            Check("No front decor or text over the animation, all 36 frames (overlapping: " + overlapping + ")", overlapping == 0);
+
+            // Анимация не заходит на кольца у корешка и не выходит за разворот
+            Check("Animation clears the spine rings and stays inside the spread",
+                content.xMin > b.center.x + 0.09f && b.Contains(new Vector3(content.xMin, content.yMin, b.center.z)) &&
+                b.Contains(new Vector3(content.xMax, content.yMax, b.center.z)));
 
             // Кнопки в стиле книги: пергаментная табличка, небольшие
             int buttonsOk = 0;
@@ -234,9 +248,8 @@ public class SpellbookSelfTest : MonoBehaviour
         // Никаких новых названий и цифр: в сцене только заданные автором тексты
         var allowed = new System.Collections.Generic.HashSet<string>
         {
-            "Ледяная буря", SpellbookTextDescription(), "Мана", "Сила", "Длительность", "Дальность", "не задано",
-            "НАЗВАНИЕ ШКОЛЫ",
-            "1", "2", "Проиграть цикл", "Повтор", "Перелистнуть",
+            "Ice Storm", SpellbookTextDescription(), "Mana", "Power", "Duration", "Range", "Not set",
+            "Ice Magic", "1", "2", "Play", "Replay", "Next Page",
         };
         var stray = new System.Collections.Generic.List<string>();
         foreach (var t in FindObjectsByType<Text>())
@@ -305,7 +318,21 @@ public class SpellbookSelfTest : MonoBehaviour
 
     // Текст описания задан автором; самопроверка — рантайм-код и не видит редакторский сборщик
     private static string SpellbookTextDescription() =>
-        "Призывает вихрь ледяных осколков, который замедляет врагов в области.";
+        "Summons a vortex of ice shards that slows enemies in an area.";
+
+    // Объединение контуров спрайтов всех кадров (tight mesh повторяет непрозрачную часть) в мировых координатах
+    private static Rect AnimationContent(LoopPlayer player, SpriteRenderer sr)
+    {
+        float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+        foreach (var frame in player.frames)
+            foreach (var v in frame.vertices)
+            {
+                Vector3 w = sr.transform.TransformPoint(v);
+                x0 = Mathf.Min(x0, w.x); y0 = Mathf.Min(y0, w.y);
+                x1 = Mathf.Max(x1, w.x); y1 = Mathf.Max(y1, w.y);
+            }
+        return Rect.MinMaxRect(x0, y0, x1, y1);
+    }
 
     private static string ArgValue(string flag)
     {
