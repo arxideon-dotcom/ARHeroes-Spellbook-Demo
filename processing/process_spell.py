@@ -15,7 +15,7 @@ Usage:
     python process_spell.py art_magenta.png --out out/
   Frame sequence (animation frames frame_000.png ... frame_039.png):
     python process_spell.py frames_magenta/ --out out/ --fps 12 --apng spell_loop.apng
-  Optional seamless-loop crossfade splice (blends the tail into the head):
+  Optional loop-seam softening (dissolves the last N frames into the first N):
     python process_spell.py frames_magenta/ --out out/ --xfade 12
 
 Requires: pip install pillow numpy
@@ -68,16 +68,20 @@ def process_image(src: Path) -> Image.Image:
 
 
 def crossfade_splice(frames: list, n: int) -> list:
-    """Blend the tail of the sequence into its head so the loop is seamless.
+    """Soften the loop seam: dissolve the last n frames toward the first n.
 
-    Only used when the generated frames do not already loop cleanly.
+    Tail frame M-n+i becomes (1-w)*tail + w*head[i], w = (i+1)/n, so the
+    tail fades into the head. The head is untouched and the sequence length
+    never changes. Only used when the generated frames do not already loop
+    cleanly.
     """
-    if n <= 0 or len(frames) < 2 * n:
+    m = len(frames)
+    if n <= 0 or m < 2 * n:
         return frames
     arrs = [np.array(f).astype(np.float32) for f in frames]
     for i in range(n):
-        w = (i + 1) / (n + 1)
-        arrs[i] = (1.0 - w) * arrs[i] + w * arrs[len(arrs) - n + i]
+        w = (i + 1) / n
+        arrs[m - n + i] = (1.0 - w) * arrs[m - n + i] + w * arrs[i]
     return [Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA") for a in arrs]
 
 
@@ -88,7 +92,8 @@ def main() -> int:
     ap.add_argument("--fps", type=float, default=12.0, help="APNG frame rate (default 12).")
     ap.add_argument("--apng", default="", help="Also build an APNG with this filename.")
     ap.add_argument("--xfade", type=int, default=0,
-                    help="Crossfade splice length in frames for a seamless loop (0 = off).")
+                    help="Soften the loop seam by dissolving the last N frames into "
+                         "the first N (0 = off).")
     args = ap.parse_args()
 
     src = Path(args.input)
@@ -107,19 +112,18 @@ def main() -> int:
         print(f"Not found: {src}", file=sys.stderr)
         return 1
 
-    frames = []
-    for f in files:
-        img = process_image(f)
+    frames = [process_image(f) for f in files]
+    # Splice before writing, so the Unity PNGs and the APNG get the same sequence
+    frames = crossfade_splice(frames, args.xfade)
+    for f, img in zip(files, frames):
         img.save(out_dir / f"{f.stem}_transparent.png")
-        frames.append(img)
     print(f"Wrote {len(frames)} transparent frame(s) to {out_dir}/")
 
     if args.apng and len(frames) > 1:
-        loop_frames = crossfade_splice(frames, args.xfade)
         ms = max(1, int(round(1000 / args.fps)))
-        loop_frames[0].save(out_dir / args.apng, save_all=True,
-                            append_images=loop_frames[1:], duration=ms, loop=0)
-        print(f"Wrote APNG {out_dir / args.apng} ({len(loop_frames)} frames, {args.fps} fps)")
+        frames[0].save(out_dir / args.apng, save_all=True,
+                       append_images=frames[1:], duration=ms, loop=0)
+        print(f"Wrote APNG {out_dir / args.apng} ({len(frames)} frames, {args.fps} fps)")
     return 0
 
 
