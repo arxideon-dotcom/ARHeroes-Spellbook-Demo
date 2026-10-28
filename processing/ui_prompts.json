@@ -2,7 +2,7 @@
   "_style": "Hand-painted fantasy strategy game UI element, aged bronze, dull gold and dark sepia ink, painterly with crisp edges, NOT photorealistic, NOT 3D render, front view, a single isolated object centered and fully in frame, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient, vignette or shadow on the background.",
   "UI_FrameRing": {
     "size": "1024x1024",
-    "prompt": "An ornate circular medallion frame ring of aged bronze with a thin gold rim, four sharp pointed compass spikes at the top, bottom, left and right, small rivets and fine engraved ornament along the band, perfectly circular, the ring band is fairly thin. The whole inside of the ring is completely EMPTY and shows the flat magenta background."
+    "prompt": "A thin ornate circular medallion frame: a narrow aged bronze ring with fine engraved ornament, four small pointed compass spikes at top, bottom, left and right just outside the ring, the ring band is very thin, about one tenth of the radius. The whole inside of the ring, about eighty percent of the diameter, is completely EMPTY and shows the flat magenta background. Painted metal, not glossy."
   },
   "UI_Banner": {
     "size": "1536x1024",
@@ -11,14 +11,6 @@
   "UI_BannerDim": {
     "size": "1536x1024",
     "prompt": "A blank horizontal ribbon banner with folded forked tails on both ends, faded dull grey-brown old parchment, low contrast, slightly arched, thin ink outline, the ribbon face is completely empty."
-  },
-  "UI_TabActive": {
-    "size": "1024x1024",
-    "prompt": "A single tall bookmark tab card with a rounded top and a straight cut bottom, polished warm gold with a bronze beveled edge and a soft golden glow, the face of the tab is plain and empty, no symbol."
-  },
-  "UI_Tab": {
-    "size": "1024x1024",
-    "prompt": "A single tall bookmark tab card with a rounded top and a straight cut bottom, dull dark brown aged leather with a worn bronze edge, muted and dim, the face of the tab is plain and empty, no symbol."
   },
   "UI_StatMana": {
     "size": "1024x1024",
@@ -43,12 +35,6 @@
   "UI_Divider": {
     "size": "1536x1024",
     "prompt": "A thin horizontal ornamental divider line drawn in dark sepia ink filigree, symmetric, tapering at both ends, with a small gold diamond in the center, very thin and wide, horizontal."
-  },
-  "UI_LetterDisc": {
-    "size": "1024x1024",
-    "style": "Flat top view, painterly but crisp, NOT photorealistic, NOT 3D. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient, vignette or shadow on the background.",
-    "prompt": "A round faded parchment disc, perfectly circular, filling most of the image, with a thin darker worn rim. In its centre a simple eight-pointed star in thin dark sepia ink, surrounded by two thin concentric ink circles at about half of the disc radius. The outer band between those circles and the rim is completely EMPTY plain parchment, reserved for lettering. No letters, no runes, no symbols, no numbers, no text anywhere.",
-    "note": "Blank disc only: make_ui_sprites.py sets A-Z around the rim in Cormorant Garamond."
   },
   "UI_InkSnowflake": {
     "size": "1024x1024",
@@ -84,5 +70,59 @@
     "size": "1024x1024",
     "style": "Flat thin dark sepia ink line drawing, like a diagram in an old manuscript, uniform thin lines, no shading, no volume, no metal, no bronze, no gold, no color fill, NOT 3D, front view, a single isolated drawing centered and fully in frame. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient, vignette or shadow on the background.",
     "prompt": "A compass rose diagram: thin concentric circles, an eight-pointed star with thin rays and fine tick marks, drawn in thin dark sepia ink like a navigation diagram in an old manuscript. No letters, no numbers, no text inside or around it."
+  },
+  "UI_Medal1": {
+    "size": "1024x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A round vignette illustration filling a circle: a cluster of tall glowing ice crystals on a snowy rock, sepia ink drawing with pale icy-blue magical glow and light watercolor, circular composition."
+  },
+  "UI_Medal2": {
+    "size": "1024x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A round vignette illustration filling a circle: a frost-covered pine branch with hanging icicles and falling snowflakes, sepia ink drawing with pale icy-blue magical glow and light watercolor, circular composition."
+  },
+  "UI_Medal3": {
+    "size": "1024x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A round vignette illustration filling a circle: a cracked frozen lake surface with frost patterns and a cold light shining from below, sepia ink drawing with pale icy-blue magical glow and light watercolor, circular composition."
+  },
+  "UI_ArtShards": {
+    "size": "1536x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "Scattered drawn ice shards and frost splinters flying outward in an arc, sepia ink outlines with fine hatching and a light pale icy-blue watercolor wash inside each shard, small snow dots, empty center."
+  },
+  "UI_Schematic": {
+    "size": "1024x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A magic circle schematic drawn with thin sepia ink lines only: several concentric rings, straight construction lines and arcs, small diamond nodes, a few tiny snowflake glyphs, like an alchemical diagram. Very thin lines, no fill, no color."
+  },
+  "UI_MarginNotes": {
+    "size": "1536x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A block of small illegible handwritten notes in faded sepia ink, cursive scribbles that look like old handwriting but contain no real readable words, five short lines, a tiny doodle of a snowflake at the end."
+  },
+  "UI_SketchCrystals": {
+    "size": "1024x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A small study sketch of three snowflakes and ice crystal shapes with construction lines, in thin sepia ink, like a margin drawing in an old manuscript, no color."
+  },
+  "UI_SketchPeak": {
+    "size": "1024x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A small ink sketch of a frozen mountain peak with a lonely tower and swirling snow clouds, thin sepia ink hatching, like a margin drawing in an old manuscript, no color."
+  },
+  "UI_TabTongue": {
+    "size": "1024x1024",
+    "style": "Detailed hand-drawn sepia ink illustration on old grimoire style, fine pen hatching, NOT 3D, NOT glossy, NOT cartoon, no text, no letters, no numbers. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no texture, shading, gradient or vignette on the background.",
+    "prompt": "A single parchment bookmark tab tongue seen from the front: a nearly square piece of aged cream parchment with slightly torn uneven edges and a thin dark ink border, the face is empty, no symbol. Flat, painted."
+  },
+  "UI_ButtonPlate": {
+    "size": "1536x1024",
+    "prompt": "A small horizontal button plate for a fantasy game book UI: dark aged bronze frame with tiny rivets and corner ornaments, aged parchment center panel, wide and short, the center is empty, no text. Painted, not glossy."
+  },
+  "UI_MedalStormInk": {
+    "size": "1024x1536",
+    "edit_of": "frame 0 of the Ice Storm loop on magenta (/v1/images/edits)",
+    "prompt": "Keep this exact ice storm tornado: the same funnel shape, pose, size, crystals at the bottom and placement in the frame. Redraw it in a new style: a detailed hand-drawn illustration from an old grimoire, fine dark sepia ink linework and pen hatching on the funnel, shards and crystals, with only the magic colored: a cold pale-cyan and icy-blue glow, translucent watercolor ice, white snow. Remove the glossy cartoon look and remove all purple and violet. No text, no letters. The background stays a COMPLETELY flat, uniform, solid magenta #FF00FF everywhere."
   }
 }

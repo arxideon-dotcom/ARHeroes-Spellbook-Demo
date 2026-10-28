@@ -86,16 +86,17 @@ public class SpellbookSelfTest : MonoBehaviour
             Check("Art fits inside the spread", b.Contains(new Vector3(art.min.x, art.min.y, b.center.z)) &&
                                                 b.Contains(new Vector3(art.max.x, art.max.y, b.center.z)));
 
-            // Левая страница: 5 вкладок (первая активна), 2x2 мини-окна (выбрано первое)
+            // Левая страница: 5 пергаментных закладок, подсвечена только первая; 2x2 медальона
+            var tabGlow = GameObject.Find("TabGlow");
             int tabsOk = 0;
             for (int i = 0; i < 5; i++)
             {
                 var tab = GameObject.Find("Tab_" + i);
-                var img = tab != null ? tab.GetComponent<Image>() : null;
-                bool active = img != null && img.sprite != null && img.sprite.name == "UI_TabActive";
-                if (img != null && OnPage(b, tab.transform, false) && active == (i == 0)) tabsOk++;
+                if (tab == null || !IsSprite(tab.transform, "UI_TabTongue") || !OnPage(b, tab.transform, false)) continue;
+                bool lit = tabGlow != null && Mathf.Abs(tabGlow.transform.position.x - tab.transform.position.x) < 0.01f;
+                if (lit == (i == 0)) tabsOk++;
             }
-            Check("5 school tabs on the left page, only the first active", tabsOk == 5);
+            Check("5 parchment school tabs on the left page, only the first lit", tabsOk == 5);
 
             int windowsOk = 0;
             for (int i = 0; i < 4; i++)
@@ -107,13 +108,18 @@ public class SpellbookSelfTest : MonoBehaviour
                 var artImage = miniArt != null ? miniArt.GetComponent<Image>() : null;
                 var label = w.transform.Find("Banner/BannerTitle");
                 var labelText = label != null ? label.GetComponent<Text>() : null;
+                string expected = i == 0 ? "UI_MedalStorm" : "UI_Medal" + i;
+                bool filled = artImage != null && artImage.sprite != null && artImage.sprite.name == expected;
                 bool ok = i == 0
-                    ? glow && artImage != null && artImage.sprite == player.frames[0] &&
-                      labelText != null && labelText.text == "Ледяная буря"
-                    : !glow && artImage == null && labelText == null && IsSprite(w.transform.Find("Mask/LetterDisc"), "UI_LetterDisc");
+                    ? glow && filled && labelText != null && labelText.text == "Ледяная буря"
+                    : !glow && filled && labelText == null;
                 if (ok) windowsOk++;
             }
-            Check("4 mini-windows on the left page: Ice Storm selected, 3 empty rune slots", windowsOk == 4);
+            Check("4 filled medallions on the left page, each with its own art; Ice Storm lit", windowsOk == 4);
+
+            var school = GameObject.Find("SchoolTitle");
+            Check("School title on the left page", school != null && OnPage(b, school.transform, false) &&
+                                                   !string.IsNullOrEmpty(school.GetComponent<Text>().text));
 
             // Правая страница: баннер с названием, описание, 4 стата
             var spellTitle = GameObject.Find("SpellTitle");
@@ -194,12 +200,42 @@ public class SpellbookSelfTest : MonoBehaviour
                 divider != null && w2 != null && OnPage(b, divider.transform, false) &&
                 divider.transform.position.y < w2.transform.position.y &&
                 Mathf.Abs(WorldWidth(divider.transform) - gridWidth) <= gridWidth * 0.02f);
+
+            // Слои: подложка под анимацией, лицевой слой над ней, и ничто лицевое не заходит на анимацию
+            var backCanvas = GameObject.Find("RightPageBack");
+            var frontCanvas = rightCanvas;
+            int backOrder = backCanvas != null ? backCanvas.GetComponent<Canvas>().sortingOrder : int.MaxValue;
+            int frontOrder = frontCanvas != null ? frontCanvas.GetComponent<Canvas>().sortingOrder : int.MinValue;
+            Check("Decor layers: back < animation < front",
+                backOrder < spriteRenderer.sortingOrder && spriteRenderer.sortingOrder < frontOrder);
+            int overlapping = 0;
+            if (frontCanvas != null)
+                foreach (var g in frontCanvas.GetComponentsInChildren<Graphic>())
+                {
+                    var corners = new Vector3[4];
+                    g.rectTransform.GetWorldCorners(corners);
+                    var r = Rect.MinMaxRect(corners[0].x, corners[0].y, corners[2].x, corners[2].y);
+                    var a = Rect.MinMaxRect(art.min.x, art.min.y, art.max.x, art.max.y);
+                    if (r.Overlaps(a)) { overlapping++; _report.AppendLine("  over the animation: " + g.name); }
+                }
+            Check("No front decor or text over the animation (overlapping: " + overlapping + ")", overlapping == 0);
+
+            // Кнопки в стиле книги: пергаментная табличка, небольшие
+            int buttonsOk = 0;
+            foreach (var n in new[] { "Button_PlayLoop", "Button_Replay", "Button_FlipPage" })
+            {
+                var btn = FindButton(n);
+                var rt = btn != null ? (RectTransform)btn.transform : null;
+                if (btn != null && IsSprite(btn.transform, "UI_ButtonPlate") && rt.rect.width <= 240f) buttonsOk++;
+            }
+            Check("Small book-style buttons", buttonsOk == 3);
         }
 
         // Никаких новых названий и цифр: в сцене только заданные автором тексты
         var allowed = new System.Collections.Generic.HashSet<string>
         {
-            "Ледяная буря", SpellbookTextDescription(), "Мана", "Сила", "Длительность", "Дальность", "—",
+            "Ледяная буря", SpellbookTextDescription(), "Мана", "Сила", "Длительность", "Дальность", "не задано",
+            "НАЗВАНИЕ ШКОЛЫ",
             "1", "2", "Проиграть цикл", "Повтор", "Перелистнуть",
         };
         var stray = new System.Collections.Generic.List<string>();
@@ -241,6 +277,28 @@ public class SpellbookSelfTest : MonoBehaviour
 
         Check("No floating title above the book", GameObject.Find("Title") == null);
 
+        // Запись движения: -spellbookRecord <папка> — кадры экрана с отметками времени
+        string recordDir = ArgValue("-spellbookRecord");
+        if (recordDir != null)
+        {
+            Directory.CreateDirectory(recordDir);
+            var times = new StringBuilder();
+            Click("Button_PlayLoop");
+            float t0 = Time.unscaledTime;
+            // Число кадров, а не время: если окно на миг теряет фокус, запись всё равно полная
+            for (int i = 0; i < 80; i++)
+            {
+                if (i == 45) { Click("Button_Replay"); times.AppendLine("replay " + (Time.unscaledTime - t0).ToString("F3")); }
+                yield return new WaitForEndOfFrame();
+                var tex = ScreenCapture.CaptureScreenshotAsTexture();
+                File.WriteAllBytes(Path.Combine(recordDir, "rec_" + i.ToString("D3") + ".jpg"), tex.EncodeToJPG(80));
+                Destroy(tex);
+                times.AppendLine(i + " " + (Time.unscaledTime - t0).ToString("F3") + " " + spriteRenderer.sprite.name);
+                yield return new WaitForSeconds(0.07f);
+            }
+            File.WriteAllText(Path.Combine(recordDir, "times.txt"), times.ToString());
+        }
+
         yield return new WaitForSeconds(0.2f);
         Finish();
     }
@@ -248,6 +306,13 @@ public class SpellbookSelfTest : MonoBehaviour
     // Текст описания задан автором; самопроверка — рантайм-код и не видит редакторский сборщик
     private static string SpellbookTextDescription() =>
         "Призывает вихрь ледяных осколков, который замедляет врагов в области.";
+
+    private static string ArgValue(string flag)
+    {
+        string[] args = Environment.GetCommandLineArgs();
+        int i = Array.IndexOf(args, flag);
+        return i >= 0 && i + 1 < args.Length ? args[i + 1] : null;
+    }
 
     private static bool IsSprite(Transform t, string name)
     {

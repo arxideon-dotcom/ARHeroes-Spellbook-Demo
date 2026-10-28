@@ -1,21 +1,20 @@
 #!/usr/bin/env python3
 """ARHeroes-Spellbook-Demo — UI sprites for the spell pages (Oct 2026).
 
-Page decoration (frames, banners, tabs, glyphs, stat icons, flourishes,
-divider) is generated with Muse from processing/ui_prompts.json on a flat
-magenta background. This script turns those raw images into the sprites
-Unity uses:
+Page decoration (frames, medallion art, banners, tabs, glyphs, stat icons,
+marginalia, buttons) is generated with Muse from processing/ui_prompts.json
+on a flat magenta background. This script turns those raw images into the
+sprites Unity uses:
 
   - keys magenta out with process_spell.py and trims to the content
   - centres the round frame on a square canvas and measures its empty hole
-  - sets A-Z clockwise around the blank Muse disc in Cormorant Garamond
-    (Muse cannot spell a full alphabet), then fits the disc into that hole,
-    so both share one canvas and scale
+  - fits the medallion illustrations into that hole as discs, so frame and
+    art share one canvas and scale
   - ink drawings keep only their line shape: tab glyphs become a white
-    alpha mask (tinted in Unity: gold when active, faded ink otherwise),
+    alpha mask (tinted in Unity: gold when active, ink otherwise),
     marginalia are recoloured to one flat ink colour
-  - draws the two trivial shapes itself: the circle mask (sized to the
-    frame's hole) and the soft selection glow
+  - draws the trivial shapes itself: the circle mask (sized to the frame's
+    hole), the selection ring glow and a soft round glow
 
 Usage:
   python make_ui_sprites.py --raw muse_raw/ --out ../Assets/Spellbook/UI
@@ -29,19 +28,21 @@ import math
 from pathlib import Path
 
 import numpy as np
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter
 
 from process_spell import process_image
 
 FRAME_SIZE = 512
-MAX_SIDE = {"UI_Banner": 768, "UI_BannerDim": 768, "UI_Divider": 768}
+MAX_SIDE = {"UI_Banner": 768, "UI_BannerDim": 768, "UI_Divider": 768, "UI_ArtShards": 1024,
+            "UI_Schematic": 768, "UI_MarginNotes": 768}
 TAB_GLYPHS = {"UI_InkSnowflake", "UI_InkGlyph0", "UI_InkGlyph1", "UI_InkGlyph2", "UI_InkGlyph3"}
-INK_LINES = {"UI_MarginCurl", "UI_MarginCompass"}
+INK_LINES = {"UI_MarginCurl", "UI_MarginCompass", "UI_Schematic", "UI_MarginNotes", "UI_SketchCrystals"}
 SQUARE = TAB_GLYPHS | {"UI_StatMana", "UI_StatPower", "UI_StatDuration", "UI_StatRange", "UI_MarginCompass"}
+# Medallion illustrations, cut to the frame's hole. The storm medallion sits on a pale ice backdrop.
+MEDALS = {"UI_Medal1": "UI_Medal1", "UI_Medal2": "UI_Medal2", "UI_Medal3": "UI_Medal3", "UI_MedalStorm": "UI_MedalStormInk"}
 INK = (58, 34, 18)
-LETTER_FONT = Path(__file__).resolve().parent.parent / "Assets/Spellbook/Fonts/CormorantGaramond-Bold.ttf"
-ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-BLUE_ART = {"UI_StatMana"}  # genuinely blue: no magenta suppression
+# Genuinely blue art: no magenta suppression
+BLUE_ART = {"UI_StatMana", "UI_Medal1", "UI_Medal2", "UI_Medal3", "UI_MedalStormInk", "UI_ArtShards"}
 GOLD_L = (255, 230, 160)
 
 
@@ -68,23 +69,6 @@ def ink_only(img: Image.Image, rgb, widen: int, gain: float) -> Image.Image:
     a = a.point(lambda v: min(255, int(v * gain)))
     out = Image.new("RGBA", img.size, tuple(rgb) + (0,))
     out.putalpha(a)
-    return out
-
-
-def letter_ring(disc_img: Image.Image) -> Image.Image:
-    """A-Z clockwise from the top, letter tops facing outward, in the empty band of the disc."""
-    out = disc_img.copy()
-    R = out.width / 2
-    font = ImageFont.truetype(str(LETTER_FONT), round(R * 0.21))
-    ring = R * 0.73
-    for i, ch in enumerate(ALPHABET):
-        theta = math.radians(-90 + i * 360 / len(ALPHABET))
-        tile = Image.new("RGBA", (round(R * 0.4), round(R * 0.4)), (0, 0, 0, 0))
-        ImageDraw.Draw(tile).text((tile.width / 2, tile.height / 2), ch, font=font, fill=INK + (235,), anchor="mm")
-        tile = tile.rotate(-(math.degrees(theta) + 90), resample=Image.BICUBIC)
-        x = R + ring * math.cos(theta) - tile.width / 2
-        y = R + ring * math.sin(theta) - tile.height / 2
-        out.alpha_composite(tile, (round(x), round(y)))
     return out
 
 
@@ -134,16 +118,39 @@ def disc(size: int, r: float) -> Image.Image:
     return big.resize((size, size), Image.LANCZOS)
 
 
-def glow(size: int, r: float) -> Image.Image:
-    """Soft golden halo peaking just outside radius r (px)."""
+def ring_glow(size: int, r: float) -> Image.Image:
+    """Soft golden halo peaking at radius r (px)."""
     yy, xx = np.mgrid[0:size, 0:size]
     d = np.hypot(xx - size / 2, yy - size / 2) / size
-    rn = r / size
-    t = np.exp(-((d - rn) / 0.05) ** 2)
-    a = (np.clip(t, 0, 1) * 255).astype(np.uint8)
+    a = (np.clip(np.exp(-((d - r / size) / 0.045) ** 2), 0, 1) * 255).astype(np.uint8)
     rgb = np.zeros((size, size, 3), np.uint8)
     rgb[...] = (GOLD_L[0], GOLD_L[1], 150)
     return Image.fromarray(np.dstack([rgb, a]), "RGBA")
+
+
+def soft_glow(size: int) -> Image.Image:
+    """White radial glow (tinted in Unity): behind the active tab and the spell art."""
+    yy, xx = np.mgrid[0:size, 0:size]
+    d = np.hypot(xx - size / 2, yy - size / 2) / (size / 2)
+    a = (np.clip(1 - d, 0, 1) ** 1.6 * 255).astype(np.uint8)
+    return Image.fromarray(np.dstack([np.full((size, size, 3), 255, np.uint8), a]), "RGBA")
+
+
+def medal(img: Image.Image, r_hole: float, backdrop=None) -> Image.Image:
+    """Illustration as a disc that exactly fills the frame's hole, on the frame's canvas."""
+    d = round(2 * (r_hole + 3))
+    art = pad_square(trim(img, 0))
+    if backdrop is not None:
+        # A tall subject on a pale ice disc: the storm keeps its full height inside the circle
+        bg = Image.new("RGBA", (art.width, art.height), backdrop + (255,))
+        bg.alpha_composite(art)
+        art = bg
+    art = art.resize((d, d), Image.LANCZOS)
+    m = disc(d, d / 2 - 0.5).split()[3]
+    art.putalpha(Image.fromarray(np.minimum(np.array(art.split()[3]), np.array(m))))
+    canvas = Image.new("RGBA", (FRAME_SIZE, FRAME_SIZE), (0, 0, 0, 0))
+    canvas.paste(art, ((FRAME_SIZE - d) // 2, (FRAME_SIZE - d) // 2))
+    return canvas
 
 
 def main() -> int:
@@ -154,33 +161,31 @@ def main() -> int:
     raw, out = Path(args.raw), Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
 
-    # The frame defines the shared canvas for the mask, the rune disc and the glow
+    # The frame defines the shared canvas for the mask, the medallion art and the glow
     frame = fit(pad_square(trim(key(raw / "UI_FrameRing.png"))), FRAME_SIZE)
     frame = frame.resize((FRAME_SIZE, FRAME_SIZE), Image.LANCZOS)
     r_hole = hole_radius(frame)
     frame.save(out / "UI_FrameRing.png", optimize=True)
     disc(FRAME_SIZE, r_hole + 3).save(out / "UI_CircleMask.png", optimize=True)
-    # halo over the bronze band, just outside the hole
-    glow(FRAME_SIZE, r_hole + FRAME_SIZE * 0.06).save(out / "UI_FrameGlow.png", optimize=True)
-
-    letters = letter_ring(pad_square(trim(key(raw / "UI_LetterDisc.png"), 0)))
-    d = round(2 * (r_hole + 3))
-    disc_canvas = Image.new("RGBA", (FRAME_SIZE, FRAME_SIZE), (0, 0, 0, 0))
-    disc_canvas.paste(letters.resize((d, d), Image.LANCZOS), ((FRAME_SIZE - d) // 2, (FRAME_SIZE - d) // 2))
-    disc_canvas.save(out / "UI_LetterDisc.png", optimize=True)
+    ring_glow(FRAME_SIZE, r_hole + FRAME_SIZE * 0.05).save(out / "UI_FrameGlow.png", optimize=True)
+    soft_glow(256).save(out / "UI_SoftGlow.png", optimize=True)
     print(f"  frame hole radius {r_hole:.0f}px of {FRAME_SIZE} ({r_hole / FRAME_SIZE:.3f})")
+
+    for name, src in MEDALS.items():
+        backdrop = (214, 232, 244) if name == "UI_MedalStorm" else None
+        medal(key(raw / f"{src}.png"), r_hole, backdrop).save(out / f"{name}.png", optimize=True)
 
     # Only the sprites listed in ui_prompts.json; raw/ may also hold rejected variants
     names = [k for k in json.loads((Path(__file__).parent / "ui_prompts.json").read_text(encoding="utf-8"))
              if not k.startswith("_")]
     for name in names:
-        if name in ("UI_FrameRing", "UI_LetterDisc"):
+        if name == "UI_FrameRing" or name in MEDALS.values():
             continue
         img = key(raw / f"{name}.png")
         if name in TAB_GLYPHS:
             img = ink_only(img, (255, 255, 255), widen=15, gain=1.5)
         elif name in INK_LINES:
-            img = ink_only(img, INK, widen=3, gain=1.6)
+            img = ink_only(img, INK, widen=3, gain=1.5)
         img = trim(img)
         if name in SQUARE:
             img = pad_square(img)
