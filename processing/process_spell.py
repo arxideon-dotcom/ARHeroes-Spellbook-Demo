@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
 """ARHeroes-Spellbook-Demo — hackathon processing step (Oct 2026).
 
-Turns Muse-generated artwork on a solid magenta #FF00FF background into
-transparent frames for the Unity demo.
+Turns Muse-generated artwork on a solid magenta #FF00FF (default) or
+green #00FF00 background into transparent frames for the Unity demo.
 
 Pipeline (the project's standing chroma rules):
   - magenta-ness = min(R, B) - G, smoothstep 30 -> 110
     (low threshold on purpose: a higher one eats dark robe/ink edges)
   - despill: pull R/B toward G on semi-transparent edge pixels
+  - --key green mirrors both: greenness = G - max(R, B), same smoothstep,
+    despill pulls G toward max(R, B). Use it for blue/violet art, where
+    blue glow on magenta turns into a purple halo.
   - canvas size is NEVER changed: all frames stay aligned for the loop
 
 Usage:
@@ -17,6 +20,8 @@ Usage:
     python process_spell.py frames_magenta/ --out out/ --fps 12 --apng spell_loop.apng
   Optional loop-seam softening (dissolves the last N frames into the first N):
     python process_spell.py frames_magenta/ --out out/ --xfade 12
+  Green-screen art:
+    python process_spell.py frames_green/ --out out/ --key green --apng spell_loop.apng
 
 Requires: pip install pillow numpy
 """
@@ -37,31 +42,51 @@ def magenta_alpha(rgb: np.ndarray) -> np.ndarray:
     r = rgb[..., 0].astype(np.float32)
     g = rgb[..., 1].astype(np.float32)
     b = rgb[..., 2].astype(np.float32)
-    magenta = np.minimum(r, b) - g
-    t = np.clip((magenta - SMOOTH_LOW) / (SMOOTH_HIGH - SMOOTH_LOW), 0.0, 1.0)
-    smooth = t * t * (3.0 - 2.0 * t)  # smoothstep: 0 = artwork, 1 = magenta
+    return _key_to_alpha(np.minimum(r, b) - g)
+
+
+def green_alpha(rgb: np.ndarray) -> np.ndarray:
+    """Alpha channel (0..1) from greenness. Green -> 0, artwork -> 1."""
+    r = rgb[..., 0].astype(np.float32)
+    g = rgb[..., 1].astype(np.float32)
+    b = rgb[..., 2].astype(np.float32)
+    return _key_to_alpha(g - np.maximum(r, b))
+
+
+def _key_to_alpha(keyness: np.ndarray) -> np.ndarray:
+    t = np.clip((keyness - SMOOTH_LOW) / (SMOOTH_HIGH - SMOOTH_LOW), 0.0, 1.0)
+    smooth = t * t * (3.0 - 2.0 * t)  # smoothstep: 0 = artwork, 1 = key colour
     return 1.0 - smooth
 
 
-def despill(rgba: np.ndarray, alpha: np.ndarray) -> np.ndarray:
-    """Remove magenta fringe on semi-transparent edges.
+def despill(rgba: np.ndarray, alpha: np.ndarray, key: str = "magenta") -> np.ndarray:
+    """Remove key-colour fringe on semi-transparent edges.
 
-    Where alpha is partial, blend R and B toward G proportionally to
-    transparency; fully opaque pixels are untouched.
+    Where alpha is partial, blend the key channels toward the other
+    channel(s) proportionally to transparency: magenta pulls R and B
+    toward G, green pulls G toward max(R, B). Fully opaque pixels are
+    untouched.
     """
     out = rgba.astype(np.float32)
     a = alpha  # 2D (H, W): per-channel math below must stay 2D
-    g = out[..., 1]
-    out[..., 0] = g + (out[..., 0] - g) * a
-    out[..., 2] = g + (out[..., 2] - g) * a
+    if key == "green":
+        ref = np.maximum(out[..., 0], out[..., 2])
+        out[..., 1] = ref + (out[..., 1] - ref) * a
+    else:
+        g = out[..., 1]
+        out[..., 0] = g + (out[..., 0] - g) * a
+        out[..., 2] = g + (out[..., 2] - g) * a
     return np.clip(out, 0, 255).astype(np.uint8)
 
 
-def process_image(src: Path) -> Image.Image:
+KEY_ALPHA = {"magenta": magenta_alpha, "green": green_alpha}
+
+
+def process_image(src: Path, key: str = "magenta") -> Image.Image:
     rgb = np.array(Image.open(src).convert("RGB"))
-    alpha = magenta_alpha(rgb)
+    alpha = KEY_ALPHA[key](rgb)
     rgba = np.dstack([rgb, (alpha * 255).astype(np.uint8)])
-    rgba[..., :3] = despill(rgba[..., :3], alpha)
+    rgba[..., :3] = despill(rgba[..., :3], alpha, key)
     transparent = float((alpha == 0).mean() * 100)
     print(f"  {src.name}: transparent={transparent:.1f}%")
     return Image.fromarray(rgba, "RGBA")
@@ -86,8 +111,10 @@ def crossfade_splice(frames: list, n: int) -> list:
 
 
 def main() -> int:
-    ap = argparse.ArgumentParser(description="Magenta-key Muse art to transparent frames.")
-    ap.add_argument("input", help="Magenta-background image file or directory of frames.")
+    ap = argparse.ArgumentParser(description="Chroma-key Muse art to transparent frames.")
+    ap.add_argument("input", help="Key-colour background image file or directory of frames.")
+    ap.add_argument("--key", choices=sorted(KEY_ALPHA), default="magenta",
+                    help="Background colour to key out: magenta #FF00FF (default) or green #00FF00.")
     ap.add_argument("--out", default="out", help="Output directory for transparent PNGs.")
     ap.add_argument("--fps", type=float, default=12.0, help="APNG frame rate (default 12).")
     ap.add_argument("--apng", default="", help="Also build an APNG with this filename.")
@@ -112,7 +139,7 @@ def main() -> int:
         print(f"Not found: {src}", file=sys.stderr)
         return 1
 
-    frames = [process_image(f) for f in files]
+    frames = [process_image(f, args.key) for f in files]
     # Splice before writing, so the Unity PNGs and the APNG get the same sequence
     frames = crossfade_splice(frames, args.xfade)
     for f, img in zip(files, frames):

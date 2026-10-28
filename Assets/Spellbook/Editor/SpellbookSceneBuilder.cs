@@ -1,6 +1,7 @@
 // ARHeroes-Spellbook-Demo — hackathon build (Oct 2026).
 // Собирает сцену книги заклинаний на развороте v8 и Windows-сборку.
 // Меню: Spellbook ▸ Build Scene / Build Windows Player.
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEditor.Build.Reporting;
@@ -19,12 +20,17 @@ public static class SpellbookSceneBuilder
     public const string ScenePath = "Assets/Spellbook/Scenes/SpellbookScene.unity";
     public const string ArtFolder = "Assets/Spellbook/Art";
     public const string SpreadPath = ArtFolder + "/Spellbook_Spread_v8.png";
+    public const string FramesFolder = "Assets/Spellbook/Frames";
+    public const string FramePrefix = "IceStorm_";
     public const string BuildPath = "Builds/Windows/ARHeroes-Spellbook-Demo.exe";
     private const string SpriteMaterialPath =
         "Packages/com.unity.render-pipelines.universal/Runtime/Materials/Sprite-Unlit-Default.mat";
 
     // 1680x964 px разворота -> 2.33 x 1.34 юнита, примерно как прежняя обложка
     private const float SpreadPixelsPerUnit = 720f;
+
+    // Кадры «Ледяной бури» 640x640 -> 0.625 юнита: ровно ширина правой области страницы
+    private const float FramePixelsPerUnit = 1024f;
 
     // Ровные области страниц в юнитах разворота (центр спрайта = 0,0),
     // с отступами от краёв, колец и корешка. Сняты по превью 2560x1440.
@@ -39,6 +45,7 @@ public static class SpellbookSceneBuilder
     public static void BuildScene()
     {
         Sprite spread = ImportSpread();
+        Sprite[] frames = ImportFrames();
         var spriteMaterial = AssetDatabase.LoadAssetAtPath<Material>(SpriteMaterialPath);
 
         // SampleScene сохраняется как SpellbookScene, дальше правим копию
@@ -71,7 +78,7 @@ public static class SpellbookSceneBuilder
         var right = CreatePage("PageRight", book.transform, RightPageCenter);
 
         CreateDescription(left.transform);
-        LoopPlayer player = CreateArtSlot(right.transform, spriteMaterial);
+        LoopPlayer player = CreateArtSlot(right.transform, spriteMaterial, frames);
 
         CreateUi(player);
         CreateEventSystem();
@@ -180,7 +187,7 @@ public static class SpellbookSceneBuilder
 
     private static void CreateDescription(Transform page)
     {
-        var canvasGo = new GameObject("PLACEHOLDER_DescriptionCanvas", typeof(RectTransform), typeof(Canvas));
+        var canvasGo = new GameObject("DescriptionCanvas", typeof(RectTransform), typeof(Canvas));
         canvasGo.transform.SetParent(page, false);
         var canvas = canvasGo.GetComponent<Canvas>();
         canvas.renderMode = RenderMode.WorldSpace;
@@ -192,17 +199,52 @@ public static class SpellbookSceneBuilder
         rt.localScale = Vector3.one * (PageSize.x / canvasWidth);
         rt.localPosition = new Vector3(0f, 0f, -0.005f);
 
-        var text = CreateText("PLACEHOLDER_Description", canvasGo.transform, 56, new Color(0.23f, 0.13f, 0.07f));
+        var text = CreateText("Description", canvasGo.transform, 56, new Color(0.23f, 0.13f, 0.07f));
         text.alignment = TextAnchor.UpperLeft;
-        text.text = "Ледяная буря\n\nPLACEHOLDER: описание заклинания.\n\n" +
+        text.text = "Ледяная буря\n\n" +
                     "Призывает вихрь ледяных осколков, который замедляет врагов в области.";
         Stretch((RectTransform)text.transform, 30f);
     }
 
-    private static LoopPlayer CreateArtSlot(Transform page, Material spriteMaterial)
+    private static Sprite[] ImportFrames()
     {
-        // Место под арт заклинания: кадров пока нет, спрайт пустой.
-        // Кадры ложатся в ровную область PageSize (0.625 x 0.875 юнита) с центром на этом объекте.
+        var guids = AssetDatabase.FindAssets(FramePrefix + " t:Texture2D", new[] { FramesFolder });
+        var paths = new List<string>();
+        foreach (var guid in guids)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guid);
+            if (Path.GetFileName(path).StartsWith(FramePrefix)) paths.Add(path);
+        }
+        paths.Sort(System.StringComparer.Ordinal);
+
+        var sprites = new Sprite[paths.Count];
+        for (int i = 0; i < paths.Count; i++)
+        {
+            var importer = (TextureImporter)AssetImporter.GetAtPath(paths[i]);
+            if (importer.textureType != TextureImporterType.Sprite ||
+                importer.spriteImportMode != SpriteImportMode.Single ||
+                !Mathf.Approximately(importer.spritePixelsPerUnit, FramePixelsPerUnit) ||
+                importer.textureCompression != TextureImporterCompression.CompressedHQ)
+            {
+                importer.textureType = TextureImporterType.Sprite;
+                importer.spriteImportMode = SpriteImportMode.Single;
+                importer.spritePixelsPerUnit = FramePixelsPerUnit;
+                importer.alphaIsTransparency = true;
+                importer.mipmapEnabled = false;
+                importer.wrapMode = TextureWrapMode.Clamp;
+                importer.maxTextureSize = 1024;
+                importer.textureCompression = TextureImporterCompression.CompressedHQ;
+                importer.SaveAndReimport();
+            }
+            sprites[i] = AssetDatabase.LoadAssetAtPath<Sprite>(paths[i]);
+        }
+        if (sprites.Length == 0) Debug.LogWarning("[Spellbook] No " + FramePrefix + "* frames in " + FramesFolder);
+        return sprites;
+    }
+
+    private static LoopPlayer CreateArtSlot(Transform page, Material spriteMaterial, Sprite[] frames)
+    {
+        // Арт заклинания в ровной области PageSize (0.625 x 0.875 юнита) с центром на этом объекте
         var go = new GameObject("SpellArt");
         go.transform.SetParent(page, false);
         go.transform.localPosition = new Vector3(0f, 0f, -0.01f);
@@ -210,9 +252,10 @@ public static class SpellbookSceneBuilder
         var sr = go.AddComponent<SpriteRenderer>();
         if (spriteMaterial != null) sr.sharedMaterial = spriteMaterial;
         sr.sortingOrder = 1;
+        sr.sprite = frames.Length > 0 ? frames[0] : null;
 
         var player = go.AddComponent<LoopPlayer>();
-        player.frames = new Sprite[0];
+        player.frames = frames;
         player.fps = 12f;
         player.loop = true;
         // Цикл запускается кнопкой «Проиграть цикл»
