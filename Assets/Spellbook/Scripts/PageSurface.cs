@@ -1,8 +1,10 @@
 // ARHeroes-Spellbook-Demo — hackathon build (Oct 2026).
 // Поверхность верхнего листа страницы — единая система координат для всего, что на ней лежит.
 // Элементы раскладываются в плоских локальных координатах страницы (px, начало — центр листа, y вверх),
-// а Map переводит такую точку на нарисованный лист: изогнутые верх и низ, перспективный скос внешнего края,
-// сжатие у корешка и перспективное сокращение рядов. Данные считает processing/make_page_surface.py.
+// а Map переводит такую точку на нарисованный лист. Середина листа — плоскость в перспективе
+// (гомография по четырём углам листа), к ней добавляется изгиб верхнего и нижнего краёв, который
+// затухает к середине листа, и сжатие у корешка по всей высоте. Данные считает
+// processing/make_page_surface.py — формула там та же.
 using UnityEngine;
 
 public class PageSurface : MonoBehaviour
@@ -11,8 +13,10 @@ public class PageSurface : MonoBehaviour
     public Vector2[] top;
     [Tooltip("Нижний край листа слева направо, px разворота")]
     public Vector2[] bottom;
-    [Tooltip("Ширина листа по верхнему и нижнему краю, px разворота: задаёт перспективу рядов")]
-    public float w0, w1;
+    [Tooltip("Гомография (u, v) -> px разворота по углам листа, 3x3 по строкам")]
+    public float[] h = new float[9];
+    [Tooltip("Доля высоты листа, на которой затухает изгиб краёв")]
+    public float falloff = 0.35f;
     [Tooltip("Центр холста страницы, px разворота")]
     public Vector2 center;
     [Tooltip("Размер листа в локальных px страницы")]
@@ -28,9 +32,24 @@ public class PageSurface : MonoBehaviour
     {
         float u = local.x / width + 0.5f;
         float v = 0.5f - local.y / height;
-        float vp = v * w0 / (w1 - v * (w1 - w0));
-        Vector2 p = Vector2.LerpUnclamped(Sample(top, u), Sample(bottom, u), vp);
+        Vector2 p = H(u, v);
+        Vector2 dT = Sample(top, u) - H(u, 0f);
+        Vector2 dB = Sample(bottom, u) - H(u, 1f);
+        p.x += (1f - v) * dT.x + v * dB.x;
+        p.y += Fade(v) * dT.y + Fade(1f - v) * dB.y;
         return new Vector2((p.x - center.x) * CanvasPerSpreadPx, (center.y - p.y) * CanvasPerSpreadPx);
+    }
+
+    private Vector2 H(float u, float v)
+    {
+        float w = h[6] * u + h[7] * v + h[8];
+        return new Vector2((h[0] * u + h[1] * v + h[2]) / w, (h[3] * u + h[4] * v + h[5]) / w);
+    }
+
+    private float Fade(float t)
+    {
+        float k = Mathf.Max(0f, 1f - t / falloff);
+        return k * k;
     }
 
     private static Vector2 Sample(Vector2[] edge, float u)

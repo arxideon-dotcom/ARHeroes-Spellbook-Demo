@@ -91,6 +91,17 @@ public class SpellbookSelfTest : MonoBehaviour
                     if (grid != null) grid.GetComponentInChildren<Image>(true).enabled = true;
                 }
 
+            // Диагностика медальонов: одинаковые круги с крестом вместо рисунков (-spellbookMedalTest)
+            if (Array.IndexOf(Environment.GetCommandLineArgs(), "-spellbookMedalTest") >= 0)
+            {
+                Sprite test = CrossedCircle(512, 0.336f);
+                for (int i = 0; i < 4; i++)
+                {
+                    var art = GameObject.Find("MiniWindow_" + i)?.transform.Find("Mask/Art");
+                    if (art != null) art.GetComponent<Image>().sprite = test;
+                }
+            }
+
             // Всё содержимое страниц садится на лист одной поверхностью; отдельного изгиба текста нет
             int unwarped = 0, graphics = 0;
             foreach (var surface in new[] { leftSurface, rightSurface })
@@ -169,6 +180,26 @@ public class SpellbookSelfTest : MonoBehaviour
                 if (ok) windowsOk++;
             }
             Check("4 filled medallions on the left sheet, each with its own art; Ice Storm lit", windowsOk == 4);
+
+            // Связка рамка + маска + рисунок + лента одинакова у всех четырёх: размер, масштаб, поворот, отступ, лента
+            int sameSet = 0;
+            RectTransform f0 = null, b0 = null;
+            for (int i = 0; i < 4; i++)
+            {
+                var w = GameObject.Find("MiniWindow_" + i);
+                var f = w != null ? (RectTransform)w.transform.Find("Frame") : null;
+                var mk = w != null ? (RectTransform)w.transform.Find("Mask") : null;
+                var bn = w != null ? (RectTransform)w.transform.Find("Banner") : null;
+                if (f == null || mk == null || bn == null || !IsSprite(bn, "UI_Banner")) continue;
+                if (i == 0) { f0 = f; b0 = bn; }
+                bool flat = f.localRotation == Quaternion.identity && f.localScale == Vector3.one &&
+                            ((RectTransform)w.transform).localRotation == Quaternion.identity && w.transform.localScale == Vector3.one &&
+                            Mathf.Abs(f.rect.width - f.rect.height) < 0.01f && mk.rect.size == f.rect.size;
+                bool same = f0 != null && f.rect.size == f0.rect.size && bn.rect.size == b0.rect.size &&
+                            bn.anchoredPosition == b0.anchoredPosition && bn.GetComponent<Image>().color == b0.GetComponent<Image>().color;
+                if (flat && same) sameSet++;
+            }
+            Check("Four identical medallion sets (round frame, mask, one light banner, same offset)", sameSet == 4);
 
             // Ряды и интервалы медальонов — равные в координатах листа
             var m = new Vector2[4];
@@ -435,6 +466,33 @@ public class SpellbookSelfTest : MonoBehaviour
             }
         }
         return Rect.MinMaxRect(r.xMin + x0 * r.width, r.yMin + y0 * r.height, r.xMin + x1 * r.width, r.yMin + y1 * r.height);
+    }
+
+    // Тестовая мишень: светлый круг по отверстию рамки, тёмный контур, крест и вписанный квадрат
+    private static Sprite CrossedCircle(int size, float holeFrac)
+    {
+        var tex = new Texture2D(size, size, TextureFormat.RGBA32, false);
+        float c = size * 0.5f, r = size * holeFrac + 3f;
+        var px = new Color32[size * size];
+        for (int y = 0; y < size; y++)
+            for (int x = 0; x < size; x++)
+            {
+                float dx = x + 0.5f - c, dy = y + 0.5f - c, d = Mathf.Sqrt(dx * dx + dy * dy);
+                Color32 col = new Color32(0, 0, 0, 0);
+                if (d <= r)
+                {
+                    col = new Color32(236, 226, 205, 255);
+                    bool rim = d > r - 7f, cross = Mathf.Abs(dx) < 3f || Mathf.Abs(dy) < 3f;
+                    bool square = (Mathf.Abs(Mathf.Abs(dx) - r * 0.7071f) < 2.5f && Mathf.Abs(dy) <= r * 0.7071f) ||
+                                  (Mathf.Abs(Mathf.Abs(dy) - r * 0.7071f) < 2.5f && Mathf.Abs(dx) <= r * 0.7071f);
+                    if (rim || cross) col = new Color32(40, 24, 12, 255);
+                    else if (square) col = new Color32(170, 40, 30, 255);
+                }
+                px[y * size + x] = col;
+            }
+        tex.SetPixels32(px);
+        tex.Apply();
+        return Sprite.Create(tex, new Rect(0, 0, size, size), new Vector2(0.5f, 0.5f), 100f);
     }
 
     private static string ArgValue(string flag)

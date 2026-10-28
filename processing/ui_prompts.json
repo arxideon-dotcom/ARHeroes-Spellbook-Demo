@@ -8,10 +8,6 @@
     "size": "1536x1024",
     "prompt": "A blank horizontal parchment ribbon banner with folded forked tails on both ends, warm cream parchment with darker folds and a thin ink outline, slightly arched, the ribbon face is completely empty."
   },
-  "UI_BannerDim": {
-    "size": "1536x1024",
-    "prompt": "A blank horizontal ribbon banner with folded forked tails on both ends, faded dull grey-brown old parchment, low contrast, slightly arched, thin ink outline, the ribbon face is completely empty."
-  },
   "UI_StatMana": {
     "size": "1024x1024",
     "prompt": "A glossy blue mana droplet icon with a white highlight and a dark ink outline, fantasy game stat icon."

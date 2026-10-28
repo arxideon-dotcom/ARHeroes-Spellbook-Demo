@@ -113,18 +113,50 @@ def sample(arr, u):
     return arr[i] + (arr[i + 1] - arr[i]) * (f - i)      # linear, extrapolates past the ends
 
 
-def surface_point(top, bottom, w0, w1, u, v):
-    vp = v * w0 / (w1 - v * (w1 - w0))                  # projective rows: top edge is farther
-    return (1 - vp) * sample(top, u) + vp * sample(bottom, u)
+# Interior = flat plane in perspective: a homography from the sheet's four corners. A ruled surface
+# between the curved edges sheared the interior (a circle near the outer edge became a 1.34:1
+# diagonal oval, the homography gives 1.15). The curvature of the top and bottom edges is added as
+# a displacement that fades out within CURL_FALLOFF of the edge, so the edges still match the paper
+# exactly while the middle of the sheet stays a plane. The horizontal spine squeeze (a function of u)
+# is kept over the full height.
+CURL_FALLOFF = 0.35
 
 
-def invert(top, bottom, w0, w1, target):
+def homography(top, bottom):
+    src = [(0, 0), (1, 0), (1, 1), (0, 1)]
+    dst = [top[0], top[-1], bottom[-1], bottom[0]]
+    A = []
+    for (x, y), (X, Y) in zip(src, dst):
+        A += [[x, y, 1, 0, 0, 0, -X * x, -X * y, -X], [0, 0, 0, x, y, 1, -Y * x, -Y * y, -Y]]
+    Hm = np.linalg.svd(np.array(A, float))[2][-1].reshape(3, 3)
+    return Hm / Hm[2, 2]
+
+
+def apply_h(Hm, u, v):
+    p = Hm @ np.array([u, v, 1.0])
+    return p[:2] / p[2]
+
+
+def falloff(t):
+    return max(0.0, 1.0 - t / CURL_FALLOFF) ** 2
+
+
+def surface_point(top, bottom, Hm, u, v):
+    p = apply_h(Hm, u, v)
+    dT = sample(top, u) - apply_h(Hm, u, 0.0)
+    dB = sample(bottom, u) - apply_h(Hm, u, 1.0)
+    dx = (1 - v) * dT[0] + v * dB[0]
+    dy = falloff(v) * dT[1] + falloff(1 - v) * dB[1]
+    return p + np.array([dx, dy])
+
+
+def invert(top, bottom, Hm, target):
     u, v = 0.5, 0.5
     for _ in range(40):
-        p = surface_point(top, bottom, w0, w1, u, v)
+        p = surface_point(top, bottom, Hm, u, v)
         e = 1e-4
-        du = (surface_point(top, bottom, w0, w1, u + e, v) - p) / e
-        dv = (surface_point(top, bottom, w0, w1, u, v + e) - p) / e
+        du = (surface_point(top, bottom, Hm, u + e, v) - p) / e
+        dv = (surface_point(top, bottom, Hm, u, v + e) - p) / e
         J = np.array([du, dv]).T
         step = np.linalg.solve(J, target - p)
         u, v = u + step[0], v + step[1]
@@ -139,9 +171,9 @@ def main():
     pages = []
     for name, pg in PAGES.items():
         top, bottom, w0, w1 = build(pg)
+        Hm = homography(top, bottom)
         cw = pg["canvas_centre_world"]
         centre = np.array([cw[0] * PPU + SPRITE_W / 2, SPRITE_H / 2 - cw[1] * PPU])
-        u0, v0 = invert(top, bottom, w0, w1, centre)
         # local size: mean edge length, in canvas px (1 spread px = 2 canvas px)
         width = (w0 + w1)                     # = 2 * mean width
         left_len = np.linalg.norm(bottom[0] - top[0]); right_len = np.linalg.norm(bottom[-1] - top[-1])
@@ -150,6 +182,7 @@ def main():
         pages.append({"name": name, "top": [{"x": float(a), "y": float(b)} for a, b in top],
                       "bottom": [{"x": float(a), "y": float(b)} for a, b in bottom],
                       "w0": float(w0), "w1": float(w1), "center": {"x": float(centre[0]), "y": float(centre[1])},
+                      "h": [float(x) for x in Hm.ravel()], "falloff": CURL_FALLOFF,
                       "width": float(width), "height": float(height)})
         print(f"{name}: local sheet {width:.0f} x {height:.0f} px (origin at the sheet centre)")
     Path(args.out).write_text(json.dumps({"pages": pages}, indent=1), encoding="utf-8")
@@ -161,12 +194,13 @@ def main():
         d = ImageDraw.Draw(bg)
         for p in pages:
             top = np.array([[q["x"], q["y"]] for q in p["top"]]); bottom = np.array([[q["x"], q["y"]] for q in p["bottom"]])
+            Hm = np.array(p["h"]).reshape(3, 3)
             for i in range(13):
                 u = i / 12
-                d.line([tuple(surface_point(top, bottom, p["w0"], p["w1"], u, v)) for v in np.linspace(0, 1, 40)], fill=(0, 220, 255, 255), width=1)
+                d.line([tuple(surface_point(top, bottom, Hm, u, v)) for v in np.linspace(0, 1, 40)], fill=(0, 220, 255, 255), width=1)
             for j in range(17):
                 v = j / 16
-                d.line([tuple(surface_point(top, bottom, p["w0"], p["w1"], u, v)) for u in np.linspace(0, 1, 40)], fill=(0, 220, 255, 255), width=1)
+                d.line([tuple(surface_point(top, bottom, Hm, u, v)) for u in np.linspace(0, 1, 40)], fill=(0, 220, 255, 255), width=1)
         bg.convert("RGB").save(args.preview)
 
 

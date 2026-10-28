@@ -6,8 +6,7 @@ Turns the Muse ink drawings (processing/ui_prompts.json, section "grimoire") int
     stroke is thick), so thin connecting lines keep their full width and stay continuous
   - the bottom border rule is split into a left and a right half, so a page number sits in a small gap
   - hatched sketches become sepia ink whose strength follows the darkness of the drawing
-  - medallion art keeps its own whites (snow, highlights, light paper): only the outer white
-    background connected to the disc rim is removed, then the art is warmed slightly to the book
+  - medallion art keeps its own drawing; it is only warmed slightly toward the book's paper
   - the active medallion gets a narrow golden rim glow and a small sparkle
 
 Usage:
@@ -62,18 +61,9 @@ def sepia_sketch(img):
 
 
 def paper_tone(img):
-    """Remove only the outer white background (connected to the disc rim); keep inner whites."""
+    """Medallion art as currently approved: only a light warm tint toward the book's paper.
+    (Removing the outer white background is a separate, not yet approved, colour step.)"""
     a = np.array(img.convert("RGBA")).astype(np.float32)
-    h, w = a.shape[:2]
-    near_white = ((a[..., :3].min(2) > 222) & (a[..., 3] > 0)).astype(np.uint8) * 255
-    m = Image.fromarray(near_white, "L")
-    cx, cy, r = w / 2, h / 2, min(w, h) / 2 - 4
-    for k in range(72):
-        x = int(cx + r * math.cos(k * math.pi / 36)); y = int(cy + r * math.sin(k * math.pi / 36))
-        if m.getpixel((x, y)) == 255: ImageDraw.floodfill(m, (x, y), 128)
-    outer = (np.array(m) == 128).astype(np.float32)
-    outer = np.array(Image.fromarray((outer * 255).astype(np.uint8)).filter(ImageFilter.GaussianBlur(2))) / 255
-    a[..., 3] *= 1 - outer
     warm = np.array([236, 214, 172], np.float32) / 255
     a[..., :3] = a[..., :3] * (0.82 + 0.18 * warm)
     return Image.fromarray(np.clip(a, 0, 255).astype(np.uint8), "RGBA")

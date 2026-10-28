@@ -167,8 +167,9 @@ def main() -> int:
     out.mkdir(parents=True, exist_ok=True)
 
     # The frame defines the shared canvas for the mask, the medallion art and the glow
-    frame = fit(pad_square(trim(key(raw / "UI_FrameRing.png"))), FRAME_SIZE)
-    frame = frame.resize((FRAME_SIZE, FRAME_SIZE), Image.LANCZOS)
+    # The generated ring is ~2 % wider than tall (an ellipse baked into the art). Scale its content to
+    # an exact square so the frame is a true circle; perspective comes only from the page surface.
+    frame = trim(key(raw / "UI_FrameRing.png")).resize((FRAME_SIZE, FRAME_SIZE), Image.LANCZOS)
     r_hole = hole_radius(frame)
     frame.save(out / "UI_FrameRing.png", optimize=True)
     disc(FRAME_SIZE, r_hole + 3).save(out / "UI_CircleMask.png", optimize=True)

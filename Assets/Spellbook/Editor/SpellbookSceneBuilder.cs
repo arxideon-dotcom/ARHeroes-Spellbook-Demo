@@ -242,7 +242,8 @@ public static class SpellbookSceneBuilder
     [System.Serializable] private class SurfacePoint { public float x, y; }
     [System.Serializable] private class SurfacePage
     {
-        public string name; public SurfacePoint[] top, bottom; public float w0, w1, width, height;
+        public string name; public SurfacePoint[] top, bottom; public float w0, w1, width, height, falloff;
+        public float[] h;
         public SurfacePoint center;
     }
     [System.Serializable] private class SurfaceFile { public SurfacePage[] pages; }
@@ -253,8 +254,8 @@ public static class SpellbookSceneBuilder
         var page = System.Array.Find(file.pages, x => x.name == pageName);
         surface.top = System.Array.ConvertAll(page.top, q => new Vector2(q.x, q.y));
         surface.bottom = System.Array.ConvertAll(page.bottom, q => new Vector2(q.x, q.y));
-        surface.w0 = page.w0;
-        surface.w1 = page.w1;
+        surface.h = page.h;
+        surface.falloff = page.falloff;
         surface.center = new Vector2(page.center.x, page.center.y);
         surface.width = page.width;
         surface.height = page.height;
@@ -542,9 +543,9 @@ public static class SpellbookSceneBuilder
             }
         }
 
-        var banner = CreateImage("Banner", root.transform, Ui(selected ? "UI_Banner" : "UI_BannerDim"),
-                                 new Vector2(0f, -250f), new Vector2(410f, 106f),
-                                 selected ? Color.white : new Color(1f, 1f, 1f, 0.85f));
+        // Одна лента на все четыре окна: тот же материал, форма, размер и отступ от рамки; текст — только у названных
+        var banner = CreateImage("Banner", root.transform, Ui("UI_Banner"),
+                                 new Vector2(0f, -250f), new Vector2(410f, 106f), Color.white);
         banner.preserveAspect = false;
         if (selected)
             CreateLabel("BannerTitle", banner.transform, title, 50, FontStyle.Bold, new Vector2(0f, 8f),
