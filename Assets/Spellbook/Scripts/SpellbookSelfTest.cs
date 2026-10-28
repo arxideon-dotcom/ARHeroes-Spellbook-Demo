@@ -78,35 +78,84 @@ public class SpellbookSelfTest : MonoBehaviour
         if (spread != null)
         {
             Bounds b = spread.bounds;
-            float centre = b.center.x;
-            Vector3 slot = player.transform.position;
-            Check("Art slot sits on the right page", slot.x > centre && b.Contains(new Vector3(slot.x, slot.y, b.center.z)));
+            var leftSurface = GameObject.Find("PageLeft") != null ? GameObject.Find("PageLeft").GetComponent<PageSurface>() : null;
+            var rightSurface = GameObject.Find("PageRight") != null ? GameObject.Find("PageRight").GetComponent<PageSurface>() : null;
+            Check("Both pages have a page surface", leftSurface != null && rightSurface != null);
+            if (leftSurface == null || rightSurface == null) { Finish(); yield break; }
 
-            // Видимая часть анимации — по контурам всех 36 кадров, а не по прямоугольнику кадра 0
-            Rect content = AnimationContent(player, spriteRenderer);
-            _report.AppendLine("  animation content (world): " + content.ToString("F3"));
-            Bounds art = new Bounds(new Vector3(content.center.x, content.center.y, spriteRenderer.bounds.center.z),
-                                    new Vector3(content.width, content.height, 0.01f));
-            Check("Art fits inside the spread", b.Contains(new Vector3(art.min.x, art.min.y, b.center.z)) &&
-                                                b.Contains(new Vector3(art.max.x, art.max.y, b.center.z)));
+            // Технический режим: показать равномерную сетку листа
+            if (ArgValue("-spellbookGrid") != null || Array.IndexOf(Environment.GetCommandLineArgs(), "-spellbookGrid") >= 0)
+                foreach (var g in new[] { "LeftPageGrid", "RightPageGrid" })
+                {
+                    var grid = GameObject.Find(g);
+                    if (grid != null) grid.GetComponentInChildren<Image>(true).enabled = true;
+                }
 
-            // Левая страница: 5 пергаментных закладок, подсвечена только первая; 2x2 медальона
+            // Всё содержимое страниц садится на лист одной поверхностью; отдельного изгиба текста нет
+            int unwarped = 0, graphics = 0;
+            foreach (var surface in new[] { leftSurface, rightSurface })
+                foreach (var g in surface.GetComponentsInChildren<Graphic>(true))
+                {
+                    graphics++;
+                    var w = g.GetComponent<PageWarp>();
+                    if (w == null || !w.enabled) { unwarped++; _report.AppendLine("  not on the page surface: " + g.name); }
+                }
+            Check("Every page element follows the page surface (" + graphics + " elements, unwarped: " + unwarped + ")",
+                unwarped == 0 && graphics > 50);
+
+            // Анимация: LoopPlayer крутит кадры, на листе их показывает Image с той же деформацией
+            var surfaceArtGo = GameObject.Find("SpellArtSurface");
+            var surfaceArt = surfaceArtGo != null ? surfaceArtGo.GetComponent<Image>() : null;
+            Check("Animation is shown on the page surface (LoopPlayer frames mirrored, renderer hidden)",
+                surfaceArt != null && surfaceArt.GetComponent<PageWarp>() != null && surfaceArt.GetComponent<SpriteMirror>() != null &&
+                !spriteRenderer.enabled && surfaceArt.sprite == spriteRenderer.sprite);
+
+            // Видимая часть анимации по контурам всех 36 кадров — в локальных координатах листа
+            Rect content = AnimationContentLocal(player, surfaceArt);
+            _report.AppendLine("  animation content (page local px): " + content.ToString("F0"));
+            Vector2 half = rightSurface.HalfSize;
+            Check("Animation stays inside the right sheet frame",
+                content.xMin > -half.x + 45f && content.xMax < half.x - 45f && content.yMax < half.y - 45f && content.yMin > -half.y);
+            float worldMinX = float.MaxValue, worldMaxY = float.MinValue, worldMinY = float.MaxValue, worldMaxX = float.MinValue;
+            var artCanvas = surfaceArt.canvas.transform;
+            for (int k = 0; k <= 20; k++)
+            {
+                float f = k / 20f;
+                foreach (var q in new[] { new Vector2(content.xMin, Mathf.Lerp(content.yMin, content.yMax, f)),
+                                          new Vector2(content.xMax, Mathf.Lerp(content.yMin, content.yMax, f)),
+                                          new Vector2(Mathf.Lerp(content.xMin, content.xMax, f), content.yMin),
+                                          new Vector2(Mathf.Lerp(content.xMin, content.xMax, f), content.yMax) })
+                {
+                    Vector3 wpt = artCanvas.TransformPoint(rightSurface.Map(q));
+                    worldMinX = Mathf.Min(worldMinX, wpt.x); worldMaxX = Mathf.Max(worldMaxX, wpt.x);
+                    worldMinY = Mathf.Min(worldMinY, wpt.y); worldMaxY = Mathf.Max(worldMaxY, wpt.y);
+                }
+            }
+            Check("Animation clears the spine rings and stays inside the spread",
+                worldMinX > b.center.x + 0.09f && worldMaxX < b.max.x && worldMinY > b.min.y && worldMaxY < b.max.y);
+
+            // Левая страница: 5 пергаментных закладок между листами, подсвечена только первая
+            var tabsCanvas = GameObject.Find("LeftPageTabs");
             var tabGlow = GameObject.Find("TabGlow");
             int tabsOk = 0;
+            float leftTop = leftSurface.HalfSize.y;
             for (int i = 0; i < 5; i++)
             {
                 var tab = GameObject.Find("Tab_" + i);
-                if (tab == null || !IsSprite(tab.transform, "UI_TabTongue") || !OnPage(b, tab.transform, false)) continue;
+                if (tab == null || !IsSprite(tab.transform, "UI_TabTongue")) continue;
+                Rect r = LocalRect(tab.GetComponent<Graphic>());
+                bool tucked = r.yMin < leftTop && r.yMax > leftTop;
                 bool lit = tabGlow != null && Mathf.Abs(tabGlow.transform.position.x - tab.transform.position.x) < 0.01f;
-                if (lit == (i == 0)) tabsOk++;
+                if (tucked && lit == (i == 0)) tabsOk++;
             }
-            Check("5 parchment school tabs on the left page, only the first lit", tabsOk == 5);
+            Check("5 parchment tabs on the left sheet's top edge, tucked between the sheets, only the first lit",
+                tabsOk == 5 && tabsCanvas != null && tabsCanvas.GetComponent<Canvas>().sortingOrder < spread.sortingOrder);
 
             int windowsOk = 0;
             for (int i = 0; i < 4; i++)
             {
                 var w = GameObject.Find("MiniWindow_" + i);
-                if (w == null || !OnPage(b, w.transform, false) || w.transform.Find("Frame") == null) continue;
+                if (w == null || !OnSheet(w.transform, leftSurface) || w.transform.Find("Frame") == null) continue;
                 bool glow = w.transform.Find("SelectedGlow") != null;
                 var miniArt = w.transform.Find("Mask/Art");
                 var artImage = miniArt != null ? miniArt.GetComponent<Image>() : null;
@@ -119,36 +168,43 @@ public class SpellbookSelfTest : MonoBehaviour
                     : !glow && filled && labelText == null;
                 if (ok) windowsOk++;
             }
-            Check("4 filled medallions on the left page, each with its own art; Ice Storm lit", windowsOk == 4);
+            Check("4 filled medallions on the left sheet, each with its own art; Ice Storm lit", windowsOk == 4);
+
+            // Ряды и интервалы медальонов — равные в координатах листа
+            var m = new Vector2[4];
+            for (int i = 0; i < 4; i++) { var w = GameObject.Find("MiniWindow_" + i); m[i] = w != null ? Local(w.transform) : Vector2.zero; }
+            Check("Medallion rows and spacing are equal on the sheet",
+                Mathf.Abs(m[0].y - m[1].y) < 0.5f && Mathf.Abs(m[2].y - m[3].y) < 0.5f &&
+                Mathf.Abs((m[1].x - m[0].x) - (m[3].x - m[2].x)) < 0.5f && Mathf.Abs(m[0].x - m[2].x) < 0.5f);
 
             var school = GameObject.Find("SchoolTitle");
-            Check("School title on the left page", school != null && OnPage(b, school.transform, false) &&
+            Check("School title on the left sheet", school != null && OnSheet(school.transform, leftSurface) &&
                                                    !string.IsNullOrEmpty(school.GetComponent<Text>().text));
 
-            // Правая страница: баннер с названием, описание, 4 стата
+            // Правая страница: баннер с названием, описание, 4 стата — сверху вниз под анимацией
             var spellTitle = GameObject.Find("SpellTitle");
             var spellTitleText = spellTitle != null ? spellTitle.GetComponent<Text>() : null;
-            Check("Title banner 'Ice Storm' on the right page, below the art",
-                spellTitleText != null && spellTitleText.text == "Ice Storm" && OnPage(b, spellTitle.transform, true) &&
-                spellTitle.transform.position.y < art.min.y);
+            Check("Title banner 'Ice Storm' on the right sheet, below the art",
+                spellTitleText != null && spellTitleText.text == "Ice Storm" && OnSheet(spellTitle.transform, rightSurface) &&
+                LocalRect(spellTitleText).yMax < content.yMin);
 
             var description = GameObject.Find("Description");
             var descriptionText = description != null ? description.GetComponent<Text>() : null;
-            Check("Description on the right page, no PLACEHOLDER marker",
+            Check("Description on the right sheet, no PLACEHOLDER marker",
                 descriptionText != null && !string.IsNullOrEmpty(descriptionText.text) &&
-                !descriptionText.text.Contains("PLACEHOLDER") && OnPage(b, description.transform, true) &&
-                spellTitle != null && description.transform.position.y < spellTitle.transform.position.y);
+                !descriptionText.text.Contains("PLACEHOLDER") && OnSheet(description.transform, rightSurface) &&
+                spellTitle != null && Local(description.transform).y < Local(spellTitle.transform).y);
 
             int statsOk = 0;
             foreach (var stat in new[] { "Stat_Mana", "Stat_Power", "Stat_Duration", "Stat_Range" })
             {
                 var go = GameObject.Find(stat);
-                if (go == null || !OnPage(b, go.transform, true)) continue;
+                if (go == null || !OnSheet(go.transform, rightSurface)) continue;
                 var icon = go.transform.Find("Icon");
                 var value = go.transform.Find("Value");
                 if (icon != null && icon.GetComponent<Image>().sprite != null &&
                     value != null && !string.IsNullOrEmpty(value.GetComponent<Text>().text) &&
-                    description != null && go.transform.position.y < description.transform.position.y)
+                    description != null && Local(go.transform).y < Local(description.transform).y)
                     statsOk++;
             }
             Check("4 stats with icons under the description", statsOk == 4);
@@ -166,17 +222,27 @@ public class SpellbookSelfTest : MonoBehaviour
             }
             Check("Tab glyphs are flat ink (snowflake gold, 4 dimmed)", glyphsOk == 5);
 
-            // Рамки страниц: один слой над разворотом и под декором; стол и тень книги — позади разворота
-            var frames = GameObject.Find("PageFrames");
-            var framesSr = frames != null ? frames.GetComponent<SpriteRenderer>() : null;
-            var leftCanvas = GameObject.Find("LeftPageCanvas");
-            var rightCanvas = GameObject.Find("RightPageCanvas");
-            int decorOrder = GameObject.Find("LeftPageBack") != null
-                ? GameObject.Find("LeftPageBack").GetComponent<Canvas>().sortingOrder : int.MinValue;
-            Check("Page frame layer above the spread, below page decor",
-                framesSr != null && framesSr.sprite != null && framesSr.sprite.name == "UI_PageFrames" &&
-                framesSr.sortingOrder > spread.sortingOrder && framesSr.sortingOrder < decorOrder &&
-                Mathf.Abs(framesSr.bounds.size.x - b.size.x) < 0.01f);
+            // Рамка листа — часть содержимого страницы: во весь лист, первым слоем подложки, на той же поверхности
+            int pageFramesOk = 0;
+            foreach (var (side, surface) in new[] { ("Left", leftSurface), ("Right", rightSurface) })
+            {
+                var backGo = GameObject.Find(side + "PageBack");
+                var frame = backGo != null ? backGo.transform.Find("PageFrame") : null;
+                var img = frame != null ? frame.GetComponent<Image>() : null;
+                if (img != null && img.sprite != null && img.sprite.name == "UI_PageFrame_" + side &&
+                    frame.GetSiblingIndex() == 0 && img.GetComponent<PageWarp>() != null &&
+                    Mathf.Abs(img.rectTransform.rect.width - surface.width) < 1f) pageFramesOk++;
+            }
+            Check("Page frames are sheet-sized page elements on the surface", pageFramesOk == 2);
+
+            int gridsOk = 0;
+            foreach (var g in new[] { "LeftPageGrid", "RightPageGrid" })
+            {
+                var grid = GameObject.Find(g);
+                var img = grid != null ? grid.GetComponentInChildren<Image>(true) : null;
+                if (img != null && img.GetComponent<PageWarp>() != null) gridsOk++;
+            }
+            Check("Surface grid present on both sheets (off unless -spellbookGrid)", gridsOk == 2);
 
             var table = GameObject.Find("Table");
             var tableSr = table != null ? table.GetComponent<SpriteRenderer>() : null;
@@ -196,12 +262,9 @@ public class SpellbookSelfTest : MonoBehaviour
                 shadowSr != null && shadowSr.sprite != null && shadowSr.sortingOrder < spread.sortingOrder &&
                 shadowSr.sortingOrder > tableSr.sortingOrder);
 
-            // Шрифты по ролям и посадка текста на бумагу
             Check("Fonts: titles IM FELL SC, description IM FELL Italic, stat labels EB Garamond",
                 FontIs("SpellTitle", "IMFellEnglishSC") && FontIs("SchoolTitle", "IMFellEnglishSC") &&
                 FontIs("Description", "IMFellEnglish-Italic") && FontIs("Stat_Mana/Label", "EBGaramond"));
-            Check("Title and description bend gently with the page",
-                Curved("SpellTitle") && Curved("Description") && Curved("SchoolTitle"));
             var cartouche = GameObject.Find("StatsCartouche");
             Check("Stats sit in a cartouche with ornamental dividers",
                 cartouche != null && IsSprite(cartouche.transform, "UI_Cartouche") &&
@@ -211,49 +274,34 @@ public class SpellbookSelfTest : MonoBehaviour
             var compass = GameObject.Find("MarginCompass");
             var statsRow = GameObject.Find("Stats");
             Check("Compass diagram under the stats, not wider than the stat row",
-                compass != null && statsRow != null && OnPage(b, compass.transform, true) &&
-                compass.transform.position.y < statsRow.transform.position.y &&
-                WorldWidth(compass.transform) <= WorldWidth(statsRow.transform) + 1e-4f);
+                compass != null && statsRow != null && OnSheet(compass.transform, rightSurface) &&
+                Local(compass.transform).y < Local(statsRow.transform).y &&
+                ((RectTransform)compass.transform).rect.width <= ((RectTransform)statsRow.transform).rect.width);
 
             var divider = GameObject.Find("GridDivider");
             var w2 = GameObject.Find("MiniWindow_2");
             var w3 = GameObject.Find("MiniWindow_3");
             float gridWidth = w2 != null && w3 != null
-                ? (w3.transform.position.x - w2.transform.position.x) + WorldWidth(w2.transform.Find("Frame"))
+                ? (Local(w3.transform).x - Local(w2.transform).x) + ((RectTransform)w2.transform.Find("Frame")).rect.width
                 : 0f;
-            Check("Divider under the second window row, as wide as the grid",
-                divider != null && w2 != null && OnPage(b, divider.transform, false) &&
-                divider.transform.position.y < w2.transform.position.y &&
-                Mathf.Abs(WorldWidth(divider.transform) - gridWidth) <= gridWidth * 0.02f);
+            Check("Divider under the second window row, as wide as the grid on the sheet",
+                divider != null && w2 != null && OnSheet(divider.transform, leftSurface) &&
+                Local(divider.transform).y < Local(w2.transform).y &&
+                Mathf.Abs(((RectTransform)divider.transform).rect.width - gridWidth) <= gridWidth * 0.02f);
 
-            // Слои: подложка под анимацией, лицевой слой над ней, и ничто лицевое не заходит на анимацию
+            // Слои: подложка под анимацией, лицевой слой над ней, и ничто лицевое не заходит на анимацию.
+            // Поверхность одна и та же, поэтому непересечение на листе = непересечение на экране
             var backCanvas = GameObject.Find("RightPageBack");
-            var frontCanvas = rightCanvas;
+            var frontCanvas = GameObject.Find("RightPageCanvas");
             int backOrder = backCanvas != null ? backCanvas.GetComponent<Canvas>().sortingOrder : int.MaxValue;
             int frontOrder = frontCanvas != null ? frontCanvas.GetComponent<Canvas>().sortingOrder : int.MinValue;
-            Check("Decor layers: back < animation < front",
-                backOrder < spriteRenderer.sortingOrder && spriteRenderer.sortingOrder < frontOrder);
+            int artOrder = surfaceArt.canvas.sortingOrder;
+            Check("Decor layers: back < animation < front", backOrder < artOrder && artOrder < frontOrder);
             int overlapping = 0;
             if (frontCanvas != null)
                 foreach (var g in frontCanvas.GetComponentsInChildren<Graphic>())
-                {
-                    var corners = new Vector3[4];
-                    g.rectTransform.GetWorldCorners(corners);
-                    // Повёрнутые элементы (боковые завитки): берём рамку по всем четырём углам
-                    float rx0 = Mathf.Min(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
-                    float rx1 = Mathf.Max(corners[0].x, corners[1].x, corners[2].x, corners[3].x);
-                    float ry0 = Mathf.Min(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
-                    float ry1 = Mathf.Max(corners[0].y, corners[1].y, corners[2].y, corners[3].y);
-                    var r = Rect.MinMaxRect(rx0, ry0, rx1, ry1);
-                    var a = Rect.MinMaxRect(art.min.x, art.min.y, art.max.x, art.max.y);
-                    if (r.Overlaps(a)) { overlapping++; _report.AppendLine("  over the animation: " + g.name); }
-                }
+                    if (LocalRect(g).Overlaps(content)) { overlapping++; _report.AppendLine("  over the animation: " + g.name); }
             Check("No front decor or text over the animation, all 36 frames (overlapping: " + overlapping + ")", overlapping == 0);
-
-            // Анимация не заходит на кольца у корешка и не выходит за разворот
-            Check("Animation clears the spine rings and stays inside the spread",
-                content.xMin > b.center.x + 0.09f && b.Contains(new Vector3(content.xMin, content.yMin, b.center.z)) &&
-                b.Contains(new Vector3(content.xMax, content.yMax, b.center.z)));
 
             // Кнопки в стиле книги: пергаментная табличка, небольшие
             int buttonsOk = 0;
@@ -341,19 +389,6 @@ public class SpellbookSelfTest : MonoBehaviour
     private static string SpellbookTextDescription() =>
         "Summons a vortex of ice shards that slows enemies in an area.";
 
-    // Объединение контуров спрайтов всех кадров (tight mesh повторяет непрозрачную часть) в мировых координатах
-    private static Rect AnimationContent(LoopPlayer player, SpriteRenderer sr)
-    {
-        float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
-        foreach (var frame in player.frames)
-            foreach (var v in frame.vertices)
-            {
-                Vector3 w = sr.transform.TransformPoint(v);
-                x0 = Mathf.Min(x0, w.x); y0 = Mathf.Min(y0, w.y);
-                x1 = Mathf.Max(x1, w.x); y1 = Mathf.Max(y1, w.y);
-            }
-        return Rect.MinMaxRect(x0, y0, x1, y1);
-    }
 
     private static bool FontIs(string path, string fontName)
     {
@@ -363,12 +398,50 @@ public class SpellbookSelfTest : MonoBehaviour
         return t != null && t.font != null && t.font.name.StartsWith(fontName);
     }
 
-    // Изгиб — небольшой: дуга до 12 px холста, наклон по перспективе до 5°
-    private static bool Curved(string name)
+    // Точка/прямоугольник элемента в плоских локальных координатах его листа (до деформации)
+    private static Vector2 Local(Transform t)
     {
-        var go = GameObject.Find(name);
-        var c = go != null ? go.GetComponent<PageTextCurve>() : null;
-        return c != null && c.enabled && c.arc > 0f && c.arc <= 12f && Mathf.Abs(c.lean) > 0f && Mathf.Abs(c.lean) <= 5f;
+        var g = t.GetComponentInParent<Canvas>();
+        Vector3 p = g.transform.InverseTransformPoint(t.position);
+        return new Vector2(p.x, p.y);
+    }
+
+    private static Rect LocalRect(Graphic g)
+    {
+        var corners = new Vector3[4];
+        g.rectTransform.GetWorldCorners(corners);
+        Transform c = g.canvas.transform;
+        float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+        foreach (var w in corners)
+        {
+            Vector3 p = c.InverseTransformPoint(w);
+            x0 = Mathf.Min(x0, p.x); y0 = Mathf.Min(y0, p.y); x1 = Mathf.Max(x1, p.x); y1 = Mathf.Max(y1, p.y);
+        }
+        return Rect.MinMaxRect(x0, y0, x1, y1);
+    }
+
+    private static bool OnSheet(Transform t, PageSurface surface)
+    {
+        Vector2 p = Local(t), h = surface.HalfSize;
+        return t.GetComponentInParent<PageSurface>() == surface && Mathf.Abs(p.x) < h.x && Mathf.Abs(p.y) < h.y;
+    }
+
+    // Объединение контуров спрайтов всех кадров (tight mesh), переведённое в прямоугольник Image на листе
+    private static Rect AnimationContentLocal(LoopPlayer player, Image art)
+    {
+        if (art == null) return new Rect();
+        Rect r = LocalRect(art);
+        float x0 = float.MaxValue, y0 = float.MaxValue, x1 = float.MinValue, y1 = float.MinValue;
+        foreach (var frame in player.frames)
+        {
+            Bounds fb = frame.bounds;
+            foreach (var v in frame.vertices)
+            {
+                float nx = (v.x - fb.min.x) / fb.size.x, ny = (v.y - fb.min.y) / fb.size.y;
+                x0 = Mathf.Min(x0, nx); y0 = Mathf.Min(y0, ny); x1 = Mathf.Max(x1, nx); y1 = Mathf.Max(y1, ny);
+            }
+        }
+        return Rect.MinMaxRect(r.xMin + x0 * r.width, r.yMin + y0 * r.height, r.xMin + x1 * r.width, r.yMin + y1 * r.height);
     }
 
     private static string ArgValue(string flag)
@@ -384,18 +457,7 @@ public class SpellbookSelfTest : MonoBehaviour
         return img != null && img.sprite != null && img.sprite.name == name;
     }
 
-    private static float WorldWidth(Transform t)
-    {
-        var rt = t as RectTransform;
-        return rt != null ? rt.rect.width * rt.lossyScale.x : 0f;
-    }
 
-    // Объект внутри разворота и на нужной половине (правая — справа от корешка)
-    private static bool OnPage(Bounds spread, Transform t, bool right)
-    {
-        Vector3 p = t.position;
-        return spread.Contains(new Vector3(p.x, p.y, spread.center.z)) && (p.x > spread.center.x) == right;
-    }
 
     private static bool IsVisible(Camera cam, Bounds b)
     {
