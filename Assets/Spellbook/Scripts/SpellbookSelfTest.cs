@@ -222,19 +222,6 @@ public class SpellbookSelfTest : MonoBehaviour
             }
             Check("Tab glyphs are flat ink (snowflake gold, 4 dimmed)", glyphsOk == 5);
 
-            // Рамка листа — часть содержимого страницы: во весь лист, первым слоем подложки, на той же поверхности
-            int pageFramesOk = 0;
-            foreach (var (side, surface) in new[] { ("Left", leftSurface), ("Right", rightSurface) })
-            {
-                var backGo = GameObject.Find(side + "PageBack");
-                var frame = backGo != null ? backGo.transform.Find("PageFrame") : null;
-                var img = frame != null ? frame.GetComponent<Image>() : null;
-                if (img != null && img.sprite != null && img.sprite.name == "UI_PageFrame_" + side &&
-                    frame.GetSiblingIndex() == 0 && img.GetComponent<PageWarp>() != null &&
-                    Mathf.Abs(img.rectTransform.rect.width - surface.width) < 1f) pageFramesOk++;
-            }
-            Check("Page frames are sheet-sized page elements on the surface", pageFramesOk == 2);
-
             int gridsOk = 0;
             foreach (var g in new[] { "LeftPageGrid", "RightPageGrid" })
             {
@@ -265,29 +252,35 @@ public class SpellbookSelfTest : MonoBehaviour
             Check("Fonts: titles IM FELL SC, description IM FELL Italic, stat labels EB Garamond",
                 FontIs("SpellTitle", "IMFellEnglishSC") && FontIs("SchoolTitle", "IMFellEnglishSC") &&
                 FontIs("Description", "IMFellEnglish-Italic") && FontIs("Stat_Mana/Label", "EBGaramond"));
-            var cartouche = GameObject.Find("StatsCartouche");
-            Check("Stats sit in a cartouche with ornamental dividers",
-                cartouche != null && IsSprite(cartouche.transform, "UI_Cartouche") &&
-                GameObject.Find("Stats") != null && GameObject.Find("Stats").transform.Find("Separator") != null);
-
-            // Компас под статами, не шире строки статов; разделитель под второй строкой окон, шириной с сетку
-            var compass = GameObject.Find("MarginCompass");
+            // Открытая строка характеристик с небольшими разделителями, без замкнутой рамки
             var statsRow = GameObject.Find("Stats");
-            Check("Compass diagram under the stats, not wider than the stat row",
-                compass != null && statsRow != null && OnSheet(compass.transform, rightSurface) &&
-                Local(compass.transform).y < Local(statsRow.transform).y &&
-                ((RectTransform)compass.transform).rect.width <= ((RectTransform)statsRow.transform).rect.width);
+            int separators = 0;
+            if (statsRow != null)
+                foreach (Transform c in statsRow.transform)
+                    if (c.name == "Separator" && IsSprite(c, "UI_OrnTick")) separators++;
+            Check("Open stat row with 3 small separators, no closed frame",
+                separators == 3 && GameObject.Find("StatsCartouche") == null);
 
-            var divider = GameObject.Find("GridDivider");
-            var w2 = GameObject.Find("MiniWindow_2");
-            var w3 = GameObject.Find("MiniWindow_3");
-            float gridWidth = w2 != null && w3 != null
-                ? (Local(w3.transform).x - Local(w2.transform).x) + ((RectTransform)w2.transform.Find("Frame")).rect.width
-                : 0f;
-            Check("Divider under the second window row, as wide as the grid on the sheet",
-                divider != null && w2 != null && OnSheet(divider.transform, leftSurface) &&
-                Local(divider.transform).y < Local(w2.transform).y &&
-                Mathf.Abs(((RectTransform)divider.transform).rect.width - gridWidth) <= gridWidth * 0.02f);
+            // Орнаментальная система: цепочки на внешних полях, заставка заголовка, цепочка знаков,
+            // нижние линии с небольшим симметричным просветом вокруг номера страницы
+            int ornamentsOk = 0;
+            foreach (var canvasName in new[] { "LeftPageCanvas", "RightPageCanvas" })
+            {
+                var c = GameObject.Find(canvasName);
+                if (c == null) continue;
+                var bl = c.transform.Find("Orn_Bottom_L"); var br = c.transform.Find("Orn_Bottom_R");
+                var num = c.transform.Find("PageNumber");
+                if (c.transform.Find("Orn_Chain") == null || bl == null || br == null || num == null) continue;
+                float gapL = Local(num).x - LocalRect(bl.GetComponent<Graphic>()).xMax;
+                float gapR = LocalRect(br.GetComponent<Graphic>()).xMin - Local(num).x;
+                if (gapL > 0f && gapR > 0f && Mathf.Abs(gapL - gapR) < 1f && gapL < 45f) ornamentsOk++;
+            }
+            Check("Ornaments: outer chains, bottom rules with a small symmetric page-number gap",
+                ornamentsOk == 2 && GameObject.Find("Orn_Headpiece") != null && GameObject.Find("Orn_SignChain") != null);
+
+            var rim = GameObject.Find("MiniWindow_0") != null ? GameObject.Find("MiniWindow_0").transform.Find("SelectedGlow") : null;
+            Check("Active medallion: narrow rim glow with glints",
+                rim != null && IsSprite(rim, "UI_RimGlow") && rim.childCount >= 3);
 
             // Слои: подложка под анимацией, лицевой слой над ней, и ничто лицевое не заходит на анимацию.
             // Поверхность одна и та же, поэтому непересечение на листе = непересечение на экране
@@ -318,7 +311,7 @@ public class SpellbookSelfTest : MonoBehaviour
         var allowed = new System.Collections.Generic.HashSet<string>
         {
             "Ice Storm", SpellbookTextDescription(), "Mana", "Power", "Duration", "Range", "Not set",
-            "Ice Magic", "1", "2", "Play", "Replay", "Next Page",
+            "ICE MAGIC", "1", "2", "Play", "Replay", "Next Page",
         };
         var stray = new System.Collections.Generic.List<string>();
         foreach (var t in FindObjectsByType<Text>())

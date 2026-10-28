@@ -172,7 +172,6 @@ def main() -> int:
     r_hole = hole_radius(frame)
     frame.save(out / "UI_FrameRing.png", optimize=True)
     disc(FRAME_SIZE, r_hole + 3).save(out / "UI_CircleMask.png", optimize=True)
-    ring_glow(FRAME_SIZE, r_hole + FRAME_SIZE * 0.05).save(out / "UI_FrameGlow.png", optimize=True)
     soft_glow(256).save(out / "UI_SoftGlow.png", optimize=True)
     print(f"  frame hole radius {r_hole:.0f}px of {FRAME_SIZE} ({r_hole / FRAME_SIZE:.3f})")
 
@@ -181,8 +180,9 @@ def main() -> int:
         medal(key(raw / f"{src}.png"), r_hole, backdrop).save(out / f"{name}.png", optimize=True)
 
     # Only the sprites listed in ui_prompts.json; raw/ may also hold rejected variants
-    names = [k for k in json.loads((Path(__file__).parent / "ui_prompts.json").read_text(encoding="utf-8"))
-             if not k.startswith("_")]
+    spec = json.loads((Path(__file__).parent / "ui_prompts.json").read_text(encoding="utf-8"))
+    # grimoire ornaments are built by make_grimoire_ornaments.py
+    names = [k for k, v in spec.items() if not k.startswith("_") and not v.get("grimoire")]
     for name in names:
         if name == "UI_FrameRing" or name in MEDALS.values() or name in NOT_SPRITES:
             continue
