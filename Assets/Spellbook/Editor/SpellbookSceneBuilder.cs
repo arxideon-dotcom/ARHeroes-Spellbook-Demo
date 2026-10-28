@@ -56,10 +56,10 @@ public static class SpellbookSceneBuilder
     private const float TitleY = 650f;
 
     // Анимация 1.3x: кадр 581x658 -> 826 x 936 px листа. Видимая часть всех 36 кадров — 784 x 893 px,
-    // её верх на 735 px от центра листа, под верхней рамкой
+    // её верх на 718 px от центра листа, под верхней рамкой
     private const float ArtHeight = 936f;
     private const float ArtWidth = ArtHeight * 581f / 658f;
-    private const float ArtCenterY = 735f + 21f - ArtHeight * 0.5f;
+    private const float ArtCenterY = 718f + 21f - ArtHeight * 0.5f;
     private const float MiniRing = 480f;
     private const float MiniSpacing = 250f;
 
@@ -539,21 +539,21 @@ public static class SpellbookSceneBuilder
         CreateImage("Margin_Column", back, column, new Vector2(470f, ArtCenterY - 40f), ByHeight(column, 360f), new Color(1f, 1f, 1f, 0.35f));
 
         // Лицевой слой — только ниже области анимации, движущиеся части ничем не закрыты
-        var banner = CreateImage("TitleBanner", canvas, Ui("UI_Banner"), new Vector2(0f, -252f), new Vector2(740f, 154f), Color.white);
+        var banner = CreateImage("TitleBanner", canvas, Ui("UI_Banner"), new Vector2(0f, -264f), new Vector2(740f, 154f), Color.white);
         banner.preserveAspect = false;
         CreateLabel("SpellTitle", banner.transform, SpellName, 80, FontStyle.Bold, new Vector2(0f, 8f),
                     new Vector2(580f, 92f), TextAnchor.MiddleCenter, RedInk);
 
         var description = CreateLabel("Description", canvas, SpellDescription, 52, FontStyle.Italic,
-                                      new Vector2(0f, -400f), new Vector2(840f, 124f), TextAnchor.MiddleCenter, Ink);
+                                      new Vector2(0f, -408f), new Vector2(840f, 124f), TextAnchor.MiddleCenter, Ink);
         description.lineSpacing = 1.0f;
 
         // Характеристики — в законченном картуше; иконки, подписи и разделители деформируются вместе с ним
-        var cartouche = CreateImage("StatsCartouche", canvas, Ui("UI_Cartouche"), new Vector2(0f, -568f),
+        var cartouche = CreateImage("StatsCartouche", canvas, Ui("UI_Cartouche"), new Vector2(0f, -574f),
                                     new Vector2(940f, 176f), Color.white);
         cartouche.preserveAspect = false;
         var stats = new GameObject("Stats", typeof(RectTransform));
-        Place(stats, canvas, new Vector2(0f, -568f), new Vector2(640f, 136f));
+        Place(stats, canvas, new Vector2(0f, -574f), new Vector2(640f, 136f));
         var rows = new[]
         {
             ("Stat_Mana", "UI_StatMana", "Mana"),
@@ -579,7 +579,7 @@ public static class SpellbookSceneBuilder
         }
 
         // Компас-диаграмма под картушем
-        Decor("MarginCompass", back, "UI_MarginCompass", new Vector2(0f, -690f), 52f, 0.8f);
+        Decor("MarginCompass", back, "UI_MarginCompass", new Vector2(0f, -688f), 44f, 0.8f);
 
         CreateLabel("PageNumber", canvas, "2", 46, FontStyle.Italic, new Vector2(0f, -(top - FrameInset - 5f)),
                     new Vector2(120f, 56f), TextAnchor.MiddleCenter, Ink);
