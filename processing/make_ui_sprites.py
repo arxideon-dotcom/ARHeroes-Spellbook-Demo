@@ -8,7 +8,12 @@ Unity uses:
 
   - keys magenta out with process_spell.py and trims to the content
   - centres the round frame on a square canvas and measures its empty hole
-  - fits the rune disc into that hole, so both share one canvas and scale
+  - sets A-Z clockwise around the blank Muse disc in Cormorant Garamond
+    (Muse cannot spell a full alphabet), then fits the disc into that hole,
+    so both share one canvas and scale
+  - ink drawings keep only their line shape: tab glyphs become a white
+    alpha mask (tinted in Unity: gold when active, faded ink otherwise),
+    marginalia are recoloured to one flat ink colour
   - draws the two trivial shapes itself: the circle mask (sized to the
     frame's hole) and the soft selection glow
 
@@ -19,18 +24,23 @@ Requires: pip install pillow numpy
 """
 
 import argparse
+import json
 import math
 from pathlib import Path
 
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 from process_spell import process_image
 
 FRAME_SIZE = 512
 MAX_SIDE = {"UI_Banner": 768, "UI_BannerDim": 768, "UI_Divider": 768}
-SQUARE = {"UI_IconSnowflake", "UI_IconGlyph0", "UI_IconGlyph1", "UI_IconGlyph2", "UI_IconGlyph3",
-          "UI_StatMana", "UI_StatPower", "UI_StatDuration", "UI_StatRange"}
+TAB_GLYPHS = {"UI_InkSnowflake", "UI_InkGlyph0", "UI_InkGlyph1", "UI_InkGlyph2", "UI_InkGlyph3"}
+INK_LINES = {"UI_MarginCurl", "UI_MarginCompass"}
+SQUARE = TAB_GLYPHS | {"UI_StatMana", "UI_StatPower", "UI_StatDuration", "UI_StatRange", "UI_MarginCompass"}
+INK = (58, 34, 18)
+LETTER_FONT = Path(__file__).resolve().parent.parent / "Assets/Spellbook/Fonts/CormorantGaramond-Bold.ttf"
+ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 BLUE_ART = {"UI_StatMana"}  # genuinely blue: no magenta suppression
 GOLD_L = (255, 230, 160)
 
@@ -48,6 +58,34 @@ def suppress_magenta(img: Image.Image) -> Image.Image:
 def key(src: Path) -> Image.Image:
     img = process_image(src)
     return img if src.stem in BLUE_ART else suppress_magenta(img)
+
+
+def ink_only(img: Image.Image, rgb, widen: int, gain: float) -> Image.Image:
+    """Keep the line shape, drop the colour: flat rgb, alpha optionally widened and strengthened."""
+    a = img.split()[3]
+    if widen > 1:
+        a = a.filter(ImageFilter.MaxFilter(widen)).filter(ImageFilter.GaussianBlur(1))
+    a = a.point(lambda v: min(255, int(v * gain)))
+    out = Image.new("RGBA", img.size, tuple(rgb) + (0,))
+    out.putalpha(a)
+    return out
+
+
+def letter_ring(disc_img: Image.Image) -> Image.Image:
+    """A-Z clockwise from the top, letter tops facing outward, in the empty band of the disc."""
+    out = disc_img.copy()
+    R = out.width / 2
+    font = ImageFont.truetype(str(LETTER_FONT), round(R * 0.21))
+    ring = R * 0.73
+    for i, ch in enumerate(ALPHABET):
+        theta = math.radians(-90 + i * 360 / len(ALPHABET))
+        tile = Image.new("RGBA", (round(R * 0.4), round(R * 0.4)), (0, 0, 0, 0))
+        ImageDraw.Draw(tile).text((tile.width / 2, tile.height / 2), ch, font=font, fill=INK + (235,), anchor="mm")
+        tile = tile.rotate(-(math.degrees(theta) + 90), resample=Image.BICUBIC)
+        x = R + ring * math.cos(theta) - tile.width / 2
+        y = R + ring * math.sin(theta) - tile.height / 2
+        out.alpha_composite(tile, (round(x), round(y)))
+    return out
 
 
 def trim(img: Image.Image, margin: int = 6) -> Image.Image:
@@ -125,18 +163,25 @@ def main() -> int:
     # halo over the bronze band, just outside the hole
     glow(FRAME_SIZE, r_hole + FRAME_SIZE * 0.06).save(out / "UI_FrameGlow.png", optimize=True)
 
-    runes = pad_square(trim(key(raw / "UI_RuneFill.png"), 0))
+    letters = letter_ring(pad_square(trim(key(raw / "UI_LetterDisc.png"), 0)))
     d = round(2 * (r_hole + 3))
-    rune_canvas = Image.new("RGBA", (FRAME_SIZE, FRAME_SIZE), (0, 0, 0, 0))
-    rune_canvas.paste(runes.resize((d, d), Image.LANCZOS), ((FRAME_SIZE - d) // 2, (FRAME_SIZE - d) // 2))
-    rune_canvas.save(out / "UI_RuneFill.png", optimize=True)
+    disc_canvas = Image.new("RGBA", (FRAME_SIZE, FRAME_SIZE), (0, 0, 0, 0))
+    disc_canvas.paste(letters.resize((d, d), Image.LANCZOS), ((FRAME_SIZE - d) // 2, (FRAME_SIZE - d) // 2))
+    disc_canvas.save(out / "UI_LetterDisc.png", optimize=True)
     print(f"  frame hole radius {r_hole:.0f}px of {FRAME_SIZE} ({r_hole / FRAME_SIZE:.3f})")
 
-    for src in sorted(raw.glob("UI_*.png")):
-        name = src.stem
-        if name in ("UI_FrameRing", "UI_RuneFill"):
+    # Only the sprites listed in ui_prompts.json; raw/ may also hold rejected variants
+    names = [k for k in json.loads((Path(__file__).parent / "ui_prompts.json").read_text(encoding="utf-8"))
+             if not k.startswith("_")]
+    for name in names:
+        if name in ("UI_FrameRing", "UI_LetterDisc"):
             continue
-        img = trim(key(src))
+        img = key(raw / f"{name}.png")
+        if name in TAB_GLYPHS:
+            img = ink_only(img, (255, 255, 255), widen=15, gain=1.5)
+        elif name in INK_LINES:
+            img = ink_only(img, INK, widen=3, gain=1.6)
+        img = trim(img)
         if name in SQUARE:
             img = pad_square(img)
         fit(img, MAX_SIDE.get(name, 512)).save(out / f"{name}.png", optimize=True)

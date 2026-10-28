@@ -110,7 +110,7 @@ public class SpellbookSelfTest : MonoBehaviour
                 bool ok = i == 0
                     ? glow && artImage != null && artImage.sprite == player.frames[0] &&
                       labelText != null && labelText.text == "Ледяная буря"
-                    : !glow && artImage == null && labelText == null && w.transform.Find("Mask/Runes") != null;
+                    : !glow && artImage == null && labelText == null && IsSprite(w.transform.Find("Mask/LetterDisc"), "UI_LetterDisc");
                 if (ok) windowsOk++;
             }
             Check("4 mini-windows on the left page: Ice Storm selected, 3 empty rune slots", windowsOk == 4);
@@ -142,7 +142,71 @@ public class SpellbookSelfTest : MonoBehaviour
                     statsOk++;
             }
             Check("4 stats with icons under the description", statsOk == 4);
+
+            // Знаки вкладок: плоские чернильные; снежинка золотая, остальные приглушены
+            int glyphsOk = 0;
+            for (int i = 0; i < 5; i++)
+            {
+                var tabGo = GameObject.Find("Tab_" + i);
+                var icon = tabGo != null ? tabGo.transform.Find("Icon") : null;
+                var img = icon != null ? icon.GetComponent<Image>() : null;
+                if (img == null || img.sprite == null || !img.sprite.name.StartsWith("UI_Ink")) continue;
+                bool gold = img.color.r > img.color.b + 0.3f && img.color.a > 0.99f;
+                if (i == 0 ? gold && img.sprite.name == "UI_InkSnowflake" : !gold && img.color.a < 0.99f) glyphsOk++;
+            }
+            Check("Tab glyphs are flat ink (snowflake gold, 4 dimmed)", glyphsOk == 5);
+
+            // 8 завитков: по 2 у каждого внешнего угла (левая страница — слева, правая — справа)
+            var curls = new System.Collections.Generic.List<Transform>();
+            foreach (var t in FindObjectsByType<RectTransform>())
+                if (t.name.StartsWith("Curl_")) curls.Add(t);
+            var leftCanvas = GameObject.Find("LeftPageCanvas");
+            var rightCanvas = GameObject.Find("RightPageCanvas");
+            int curlsOk = 0;
+            foreach (var c in curls)
+            {
+                bool left = c.name.StartsWith("Curl_Left");
+                var pageCanvas = left ? leftCanvas : rightCanvas;
+                if (pageCanvas == null) continue;
+                Vector3 local = pageCanvas.transform.InverseTransformPoint(c.position);
+                bool outerSide = left ? local.x < 0f : local.x > 0f;
+                bool vertical = c.name.Contains("_Top_") ? local.y > 0f : local.y < 0f;
+                if (outerSide && vertical && b.Contains(new Vector3(c.position.x, c.position.y, b.center.z))) curlsOk++;
+            }
+            Check("8 corner curls, 2 at each outer page corner (found " + curls.Count + ")",
+                curls.Count == 8 && curlsOk == 8);
+
+            // Компас под статами, не шире строки статов; разделитель под второй строкой окон, шириной с сетку
+            var compass = GameObject.Find("MarginCompass");
+            var statsRow = GameObject.Find("Stats");
+            Check("Compass diagram under the stats, not wider than the stat row",
+                compass != null && statsRow != null && OnPage(b, compass.transform, true) &&
+                compass.transform.position.y < statsRow.transform.position.y &&
+                WorldWidth(compass.transform) <= WorldWidth(statsRow.transform) + 1e-4f);
+
+            var divider = GameObject.Find("GridDivider");
+            var w2 = GameObject.Find("MiniWindow_2");
+            var w3 = GameObject.Find("MiniWindow_3");
+            float gridWidth = w2 != null && w3 != null
+                ? (w3.transform.position.x - w2.transform.position.x) + WorldWidth(w2.transform.Find("Frame"))
+                : 0f;
+            Check("Divider under the second window row, as wide as the grid",
+                divider != null && w2 != null && OnPage(b, divider.transform, false) &&
+                divider.transform.position.y < w2.transform.position.y &&
+                Mathf.Abs(WorldWidth(divider.transform) - gridWidth) <= gridWidth * 0.02f);
         }
+
+        // Никаких новых названий и цифр: в сцене только заданные автором тексты
+        var allowed = new System.Collections.Generic.HashSet<string>
+        {
+            "Ледяная буря", SpellbookTextDescription(), "Мана", "Сила", "Длительность", "Дальность", "—",
+            "1", "2", "Проиграть цикл", "Повтор", "Перелистнуть",
+        };
+        var stray = new System.Collections.Generic.List<string>();
+        foreach (var t in FindObjectsByType<Text>())
+            if (!allowed.Contains(t.text)) stray.Add(t.text);
+        Check("No new names or numbers (stray texts: " + stray.Count + ")", stray.Count == 0);
+        foreach (var t in stray) _report.AppendLine("  stray: " + t);
 
         // До нажатия кадр стоит на первом
         Sprite idle = spriteRenderer.sprite;
@@ -179,6 +243,22 @@ public class SpellbookSelfTest : MonoBehaviour
 
         yield return new WaitForSeconds(0.2f);
         Finish();
+    }
+
+    // Текст описания задан автором; самопроверка — рантайм-код и не видит редакторский сборщик
+    private static string SpellbookTextDescription() =>
+        "Призывает вихрь ледяных осколков, который замедляет врагов в области.";
+
+    private static bool IsSprite(Transform t, string name)
+    {
+        var img = t != null ? t.GetComponent<Image>() : null;
+        return img != null && img.sprite != null && img.sprite.name == name;
+    }
+
+    private static float WorldWidth(Transform t)
+    {
+        var rt = t as RectTransform;
+        return rt != null ? rt.rect.width * rt.lossyScale.x : 0f;
     }
 
     // Объект внутри разворота и на нужной половине (правая — справа от корешка)
