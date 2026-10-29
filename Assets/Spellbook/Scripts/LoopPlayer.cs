@@ -8,6 +8,8 @@ public class LoopPlayer : MonoBehaviour
     public Sprite[] frames;
     [Tooltip("Playback speed in frames per second.")]
     public float fps = 12f;
+    [Tooltip("Optional per-frame durations in seconds (e.g. APNG delays). Overrides fps when it has one entry per frame.")]
+    public float[] frameDurations;
     public bool loop = true;
     public bool playOnStart = true;
     private SpriteRenderer _renderer;
@@ -27,10 +29,10 @@ public class LoopPlayer : MonoBehaviour
     }
     private void Update()
     {
-        if (!_playing || frames == null || frames.Length == 0 || fps <= 0f) return;
+        if (!_playing || frames == null || frames.Length == 0) return;
         _timer += Time.deltaTime;
-        float frameTime = 1f / fps;
-        while (_timer >= frameTime)
+        float frameTime;
+        while ((frameTime = FrameTime(_index)) > 0f && _timer >= frameTime)
         {
             _timer -= frameTime;
             _index++;
@@ -42,6 +44,12 @@ public class LoopPlayer : MonoBehaviour
         }
         ShowFrame(_index);
     }
+    private float FrameTime(int i)
+    {
+        if (frameDurations != null && frameDurations.Length == frames.Length) return frameDurations[i];
+        return fps > 0f ? 1f / fps : 0f;
+    }
+
     private void ShowFrame(int i)
     {
         if (_renderer != null && frames != null && frames.Length > 0)
@@ -51,4 +59,17 @@ public class LoopPlayer : MonoBehaviour
     public void Pause() { _playing = false; }
     public void Resume() { if (frames != null && frames.Length > 0) _playing = true; }
     public void Replay() { Play(); }
+    public bool IsPlaying => _playing;
+
+    /// Another clip: the previous one stops at once and the first frame of the new one is shown (Play starts it).
+    public void SetClip(Sprite[] clipFrames, float clipFps, float[] durations)
+    {
+        _playing = false;
+        frames = clipFrames;
+        fps = clipFps;
+        frameDurations = durations;
+        _index = 0;
+        _timer = 0f;
+        ShowFrame(0);
+    }
 }

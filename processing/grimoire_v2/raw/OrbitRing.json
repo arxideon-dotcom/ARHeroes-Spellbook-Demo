@@ -1,0 +1,16 @@
+{
+ "model": "muse-image-1.0",
+ "endpoint": "https://api.meta.ai/v1/images/edits",
+ "size": "1024x1024",
+ "inputs": [
+  "ref_left_page.png"
+ ],
+ "prompt": "Use the attached image only as a style reference for the ink technique, line quality and ornament of an old grimoire. Do not copy its layout, objects, hands, armor, people or text. Draw a new, separate image: a circular astrological orbit ornament: two or three thin concentric orbit circles with small beads, tiny planets, small four-point stars and two crescent moons placed along the orbits, plus four tiny diamond nodes at top, bottom, left and right. The whole central area, about seventy percent of the diameter, is completely EMPTY magenta because a round medallion frame sits there. Evenly balanced around the centre. Detailed hand-drawn dark sepia-brown ink drawing in the manner of an old grimoire, fine pen strokes with varied line weight from hairline to medium, delicate hatching, connected flowing ornament, hand-made and slightly irregular, NOT a clean technical drawing, NOT 3D, NOT glossy, NOT cartoon, no thick black bars, no text, no letters, no numbers, no rows of runes. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no paper, no parchment texture, no shading, no gradient, no vignette on the background.",
+ "usage": {
+  "input_tokens": 21547,
+  "output_tokens": 2181,
+  "total_tokens": 23728
+ },
+ "seconds": 21.3,
+ "time": "2026-10-28 21:31:30"
+}

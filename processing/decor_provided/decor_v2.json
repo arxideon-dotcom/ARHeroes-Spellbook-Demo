@@ -1,0 +1,128 @@
+{
+ "source": "medallion_composition_src.png",
+ "hole_r": 62.0,
+ "elements": {
+  "UI_DecorOrbit0": {
+   "box": [
+    151,
+    121,
+    367,
+    337
+   ],
+   "hole": [
+    259.9,
+    229.7
+   ]
+  },
+  "UI_DecorOrbit1": {
+   "box": [
+    386,
+    121,
+    602,
+    337
+   ],
+   "hole": [
+    494.0,
+    229.1
+   ]
+  },
+  "UI_DecorOrbit2": {
+   "box": [
+    142,
+    414,
+    358,
+    630
+   ],
+   "hole": [
+    250.5,
+    522.9
+   ]
+  },
+  "UI_DecorOrbit3": {
+   "box": [
+    395,
+    407,
+    611,
+    623
+   ],
+   "hole": [
+    503.9,
+    515.6
+   ]
+  },
+  "UI_DecorEmblem": {
+   "box": [
+    285,
+    283,
+    469,
+    467
+   ]
+  },
+  "UI_DecorArmUp": {
+   "box": [
+    362,
+    140,
+    392,
+    290
+   ]
+  },
+  "UI_DecorArmDown": {
+   "box": [
+    362,
+    462,
+    392,
+    600
+   ]
+  },
+  "UI_DecorCityL": {
+   "box": [
+    10,
+    500,
+    362,
+    795
+   ]
+  },
+  "UI_DecorCityR": {
+   "box": [
+    432,
+    500,
+    708,
+    795
+   ]
+  },
+  "UI_DecorChalice": {
+   "box": [
+    338,
+    604,
+    424,
+    792
+   ]
+  },
+  "UI_DecorCompass": {
+   "box": [
+    66,
+    54,
+    194,
+    182
+   ]
+  },
+  "UI_DecorPlanets": {
+   "box": [
+    72,
+    165,
+    128,
+    340
+   ]
+  }
+ },
+ "ribbon": {
+  "size": [
+   1640,
+   432
+  ],
+  "band_top": 120,
+  "band_bottom": 337,
+  "band_left": 286,
+  "band_right": 1355
+ }
+}

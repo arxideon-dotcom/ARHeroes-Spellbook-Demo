@@ -1,0 +1,14 @@
+{
+ "model": "muse-image-1.0",
+ "endpoint": "https://api.meta.ai/v1/images/generations",
+ "size": "1024x1024",
+ "inputs": [],
+ "prompt": "One small golden four-point sparkle star with long thin rays and a soft warm glow, centred, occupying the middle third of the image. Pure black background everywhere, no texture, no other objects, no text.",
+ "usage": {
+  "input_tokens": 35523,
+  "output_tokens": 2022,
+  "total_tokens": 37545
+ },
+ "seconds": 25.3,
+ "time": "2026-10-28 21:34:38"
+}

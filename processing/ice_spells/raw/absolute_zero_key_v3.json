@@ -1,0 +1,17 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "https://api.meta.ai/v1/images/edits",
+  "size": "1024x1024",
+  "inputs": [
+    "ice_storm_reference_1024.png",
+    "frost_breath_style_ref_1024.png",
+    "absolute_zero_plot_reference.png"
+  ],
+  "prompt_file": "absolute_zero_key_v3.txt",
+  "prompt": "Three reference images are attached. Images 1 and 2 (an ice tornado and an ice dragon head) are STYLE REFERENCES ONLY: copy their art style exactly, but do not include a tornado or a dragon. Image 3 is a SUBJECT AND POSE REFERENCE ONLY: a knight struck by freezing cold; take only the idea and the staggering pose from it, do NOT copy its pixel-art look, its low resolution, its red round frame, its text or its blue spotlight. Paint a NEW illustration, the ABSOLUTE ZERO spell hitting its target: one ordinary human knight in plain grey steel plate armor with a closed helmet, a sword and a small shield, clearly a normal knight, the victim of the spell, not an ice warrior. Full figure, three-quarter view. He is caught mid-stagger and losing his balance: knees buckling, body twisted and leaning, the sword arm hanging stiff and low, the shield arm frozen half raised. White hoarfrost and a cold blue glow are spreading over his whole body from the feet upward, the steel is coated in rime and thin clear ice. Glowing blue-white cracks run across the frozen armor and figure, and the figure is starting to break: a few chunks of frozen armor and ice are chipping and splitting off the shoulder, the forearm and the helmet edge, small frozen fragments and ice shards flying off, with thin gaps where pieces separate. No blood, no visible flesh, no gore, no fire. Under his feet only a small patch of frozen ground with frost and a little ice. Do NOT add a crystal crown, do NOT add huge ice pauldrons, do NOT add a big pedestal or bed of large ice crystals. Art style exactly like images 1 and 2: detailed hand-painted fantasy magic illustration, bold readable shapes, faceted translucent light-blue ice, deep blue shadows, crisp white highlights and sparkles, small soft lilac accents in the cold glow streaks, snowflakes and ice dust, same line weight, detail and saturation. Not pixel art, not a sketch, not photorealistic, not 3D render. No text, no letters, no frame, no circle, no border, no interface. The background is a COMPLETELY flat, uniform, solid pure green color #00FF00 everywhere around the subject: no black, no texture, no shading, no gradient, no vignette, no glow spilling into the background, no scenery. The whole figure and all fragments are fully inside the image with a clear green margin on every side.",
+  "usage": {
+    "input_tokens": 28148,
+    "output_tokens": 2774,
+    "total_tokens": 30922
+  }
+}

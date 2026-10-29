@@ -1,0 +1,14 @@
+{
+ "model": "muse-image-1.0",
+ "endpoint": "https://api.meta.ai/v1/images/generations",
+ "size": "1024x1024",
+ "inputs": [],
+ "prompt": "A thin ring of soft warm golden light, a perfect circle centred in the image with a diameter of about ninety percent of the image width, gently glowing, slightly brighter at a few points. Pure black background everywhere, no texture, no other objects, no text.",
+ "usage": {
+  "input_tokens": 26044,
+  "output_tokens": 1602,
+  "total_tokens": 27646
+ },
+ "seconds": 19.3,
+ "time": "2026-10-28 21:34:13"
+}

@@ -1,7 +1,7 @@
 // ARHeroes-Spellbook-Demo — hackathon build (Oct 2026).
 // Самопроверка собранного плеера. Включается только аргументом командной строки:
 //   ARHeroes-Spellbook-Demo.exe -spellbookSelfTest <report.txt>
-// Нажимает кнопки через EventSystem (как настоящий клик), пишет отчёт и скриншот, выходит.
+// Кнопок нет: проверяет автозапуск, выбор медальонов кликом по экранной точке и циклы, пишет отчёт, выходит.
 // Без аргумента ничего не делает.
 using System;
 using System.Collections;
@@ -65,8 +65,8 @@ public class SpellbookSelfTest : MonoBehaviour
         // Слот «Ледяной бури»: 36 кадров, все на месте
         bool framesOk = player.frames != null && player.frames.Length == 36 &&
                         System.Array.TrueForAll(player.frames, f => f != null);
-        Check("36 Ice Storm frames, fps 9, loop on, playOnStart off",
-            framesOk && Mathf.Approximately(player.fps, 9f) && player.loop && !player.playOnStart);
+        Check("36 Ice Storm frames, fps 9, loop on",
+            framesOk && Mathf.Approximately(player.fps, 9f) && player.loop);
         if (!framesOk) { Finish(); yield break; }
 
         var cam = Camera.main;
@@ -121,29 +121,43 @@ public class SpellbookSelfTest : MonoBehaviour
                 surfaceArt != null && surfaceArt.GetComponent<PageWarp>() != null && surfaceArt.GetComponent<SpriteMirror>() != null &&
                 !spriteRenderer.enabled && surfaceArt.sprite == spriteRenderer.sprite);
 
-            // Видимая часть анимации по контурам всех 36 кадров — в локальных координатах листа
-            Rect content = AnimationContentLocal(player, surfaceArt);
-            _report.AppendLine("  animation content (page local px): " + content.ToString("F0"));
+            var selector = FindAnyObjectByType<SpellSelector>();
+            Check("Spell selector with 4 spells", selector != null && selector.spells != null && selector.spells.Length == 4);
+            if (selector == null || selector.spells == null || selector.spells.Length != 4) { Finish(); yield break; }
+
+            // Видимая часть анимации по контурам всех кадров каждого заклинания — в локальных координатах листа.
+            // Ice Storm проверяется последним, после цикла выбран он, как при запуске
             Vector2 half = rightSurface.HalfSize;
-            Check("Animation stays inside the right sheet frame",
-                content.xMin > -half.x + 45f && content.xMax < half.x - 45f && content.yMax < half.y - 45f && content.yMin > -half.y);
-            float worldMinX = float.MaxValue, worldMaxY = float.MinValue, worldMinY = float.MaxValue, worldMaxX = float.MinValue;
-            var artCanvas = surfaceArt.canvas.transform;
-            for (int k = 0; k <= 20; k++)
+            var frontCanvas = GameObject.Find("RightPageCanvas");
+            var titleGo = GameObject.Find("SpellTitle");
+            Rect content = default;
+            int insideFrame = 0, clearsSpine = 0, clearOfFront = 0, titleBelow = 0, textsFit = 0;
+            for (int si = selector.spells.Length - 1; si >= 0; si--)
             {
-                float f = k / 20f;
-                foreach (var q in new[] { new Vector2(content.xMin, Mathf.Lerp(content.yMin, content.yMax, f)),
-                                          new Vector2(content.xMax, Mathf.Lerp(content.yMin, content.yMax, f)),
-                                          new Vector2(Mathf.Lerp(content.xMin, content.xMax, f), content.yMin),
-                                          new Vector2(Mathf.Lerp(content.xMin, content.xMax, f), content.yMax) })
-                {
-                    Vector3 wpt = artCanvas.TransformPoint(rightSurface.Map(q));
-                    worldMinX = Mathf.Min(worldMinX, wpt.x); worldMaxX = Mathf.Max(worldMaxX, wpt.x);
-                    worldMinY = Mathf.Min(worldMinY, wpt.y); worldMaxY = Mathf.Max(worldMaxY, wpt.y);
-                }
+                selector.Select(si);
+                string spellName = selector.spells[si].title;
+                content = AnimationContentLocal(player, surfaceArt);
+                _report.AppendLine("  " + spellName + ": " + player.frames.Length + " frames, content (page local px): " + content.ToString("F0"));
+                if (content.xMin > -half.x + 45f && content.xMax < half.x - 45f && content.yMax < half.y - 45f && content.yMin > -half.y)
+                    insideFrame++;
+                else _report.AppendLine("  outside the sheet frame: " + spellName);
+                if (ClearsSpine(content, rightSurface, surfaceArt, b)) clearsSpine++;
+                else _report.AppendLine("  over the spine or outside the spread: " + spellName);
+                int over = 0;
+                if (frontCanvas != null)
+                    foreach (var g in frontCanvas.GetComponentsInChildren<Graphic>())
+                        if (g.name != "SheetClip" && LocalRect(g).Overlaps(content)) { over++; _report.AppendLine("  over the " + spellName + " animation: " + g.name); }
+                if (over == 0) clearOfFront++;
+                if (titleGo != null && LocalRect(titleGo.GetComponent<Graphic>()).yMax < content.yMin) titleBelow++;
+                var descGo = GameObject.Find("Description");
+                if (titleGo != null && descGo != null && Fits(titleGo.GetComponent<Text>()) && Fits(descGo.GetComponent<Text>(), 2)) textsFit++;
+                else _report.AppendLine("  title or description does not fit: " + spellName);
             }
-            Check("Animation clears the spine rings and stays inside the spread",
-                worldMinX > b.center.x + 0.09f && worldMaxX < b.max.x && worldMinY > b.min.y && worldMaxY < b.max.y);
+            Check("Every spell's animation (all frames) stays inside the right sheet frame (" + insideFrame + "/4)", insideFrame == 4);
+            Check("Every spell's animation clears the spine rings and stays inside the spread (" + clearsSpine + "/4)", clearsSpine == 4);
+            Check("No front decor or text over any spell's animation, all frames (" + clearOfFront + "/4)", clearOfFront == 4);
+            Check("Title banner below every spell's animation (" + titleBelow + "/4)", titleBelow == 4);
+            Check("Every spell's title fits its banner, description in at most two lines (" + textsFit + "/4)", textsFit == 4);
 
             // Левая страница: 5 пергаментных закладок между листами, подсвечена только первая
             var tabsCanvas = GameObject.Find("LeftPageTabs");
@@ -161,25 +175,50 @@ public class SpellbookSelfTest : MonoBehaviour
             }
             Check("5 parchment tabs on the left sheet's top edge, tucked between the sheets, only the first lit",
                 tabsOk == 5 && tabsCanvas != null && tabsCanvas.GetComponent<Canvas>().sortingOrder < spread.sortingOrder);
+            // Активная закладка выступает над листом на 30 % дальше, низ на месте, знак того же размера
+            var tab0 = GameObject.Find("Tab_0");
+            var tab1 = GameObject.Find("Tab_1");
+            if (tab0 != null && tab1 != null)
+            {
+                Rect t0r = LocalRect(tab0.GetComponent<Graphic>()), t1r = LocalRect(tab1.GetComponent<Graphic>());
+                float out0 = t0r.yMax - leftTop, out1 = t1r.yMax - leftTop;
+                var i0 = (RectTransform)tab0.transform.Find("Icon");
+                var i1 = (RectTransform)tab1.transform.Find("Icon");
+                _report.AppendLine("  tab above the sheet: active " + out0.ToString("F1") + " px, others " + out1.ToString("F1") + " px");
+                Check("Active tab sticks out ~30% further, same bottom, same glyph size",
+                    out1 > 0f && Mathf.Abs(out0 / out1 - 1.3f) < 0.03f && Mathf.Abs(t0r.yMin - t1r.yMin) < 0.5f &&
+                    i0 != null && i1 != null && i0.rect.size == i1.rect.size);
+            }
+            else Check("Active tab sticks out ~30% further", false);
 
             int windowsOk = 0;
             for (int i = 0; i < 4; i++)
             {
                 var w = GameObject.Find("MiniWindow_" + i);
                 if (w == null || !OnSheet(w.transform, leftSurface) || w.transform.Find("Frame") == null) continue;
-                bool glow = w.transform.Find("SelectedGlow") != null;
+                var glow = w.transform.Find("SelectedGlow");
                 var miniArt = w.transform.Find("Mask/Art");
                 var artImage = miniArt != null ? miniArt.GetComponent<Image>() : null;
                 var label = w.transform.Find("Banner/BannerTitle");
                 var labelText = label != null ? label.GetComponent<Text>() : null;
-                string expected = i == 0 ? "UI_MedalStorm" : "UI_Medal" + i;
-                bool filled = artImage != null && artImage.sprite != null && artImage.sprite.name == expected;
-                bool ok = i == 0
-                    ? glow && filled && labelText != null && labelText.text == "Ice Storm"
-                    : !glow && filled && labelText == null;
-                if (ok) windowsOk++;
+                bool filled = artImage != null && artImage.sprite != null && artImage.sprite.name == MedalArt[i];
+                if (glow != null && glow.gameObject.activeSelf == (i == 0) && filled &&
+                    labelText != null && labelText.text == SpellTitles[i])
+                    windowsOk++;
             }
-            Check("4 filled medallions on the left sheet, each with its own art; Ice Storm lit", windowsOk == 4);
+            Check("4 medallions with the spells' own thumbnails and named banners; only Ice Storm lit", windowsOk == 4);
+
+            // Подписи помещаются: ширина строки шрифта не больше поля текста, у всех лент один размер
+            int labelsFit = 0, labelSize = -1;
+            bool sameSize = true;
+            for (int i = 0; i < 4; i++)
+            {
+                var label = GameObject.Find("MiniWindow_" + i)?.transform.Find("Banner/BannerTitle")?.GetComponent<Text>();
+                if (label == null) continue;
+                if (labelSize < 0) labelSize = label.fontSize; else sameSize &= label.fontSize == labelSize;
+                if (Fits(label)) labelsFit++; else _report.AppendLine("  does not fit its banner: " + label.text);
+            }
+            Check("Every medallion label fits its banner, one font size (" + labelsFit + "/4)", labelsFit == 4 && sameSize);
 
             // Связка рамка + маска + рисунок + лента одинакова у всех четырёх: размер, масштаб, поворот, отступ, лента
             int sameSet = 0;
@@ -190,7 +229,7 @@ public class SpellbookSelfTest : MonoBehaviour
                 var f = w != null ? (RectTransform)w.transform.Find("Frame") : null;
                 var mk = w != null ? (RectTransform)w.transform.Find("Mask") : null;
                 var bn = w != null ? (RectTransform)w.transform.Find("Banner") : null;
-                if (f == null || mk == null || bn == null || !IsSprite(bn, "UI_Banner")) continue;
+                if (f == null || mk == null || bn == null || !IsSprite(bn, "UI_V2_NameRibbonCompact")) continue;
                 if (i == 0) { f0 = f; b0 = bn; }
                 bool flat = f.localRotation == Quaternion.identity && f.localScale == Vector3.one &&
                             ((RectTransform)w.transform).localRotation == Quaternion.identity && w.transform.localScale == Vector3.one &&
@@ -299,89 +338,154 @@ public class SpellbookSelfTest : MonoBehaviour
             {
                 var c = GameObject.Find(canvasName);
                 if (c == null) continue;
-                var bl = c.transform.Find("Orn_Bottom_L"); var br = c.transform.Find("Orn_Bottom_R");
-                var num = c.transform.Find("PageNumber");
-                if (c.transform.Find("Orn_Chain") == null || bl == null || br == null || num == null) continue;
+                var bl = c.transform.Find("SheetClip/Orn_Bottom_L"); var br = c.transform.Find("SheetClip/Orn_Bottom_R");
+                var num = c.transform.Find("SheetClip/PageNumber");
+                if (c.transform.Find("SheetClip/Orn_Chain") == null || bl == null || br == null || num == null) continue;
                 float gapL = Local(num).x - LocalRect(bl.GetComponent<Graphic>()).xMax;
                 float gapR = LocalRect(br.GetComponent<Graphic>()).xMin - Local(num).x;
                 if (gapL > 0f && gapR > 0f && Mathf.Abs(gapL - gapR) < 1f && gapL < 45f) ornamentsOk++;
             }
             Check("Ornaments: outer chains, bottom rules with a small symmetric page-number gap",
-                ornamentsOk == 2 && GameObject.Find("Orn_Headpiece") != null && GameObject.Find("Orn_SignChain") != null);
+                ornamentsOk == 2 && GameObject.Find("Orn_TitleRibbon") != null && GameObject.Find("Decor_Emblem") != null);
+            // Подложки внутри медальонов: под иллюстрацией, внутри маски окна
+            int underOk = 0;
+            for (int i = 0; i < 4; i++)
+            {
+                var mw = GameObject.Find("MiniWindow_" + i);
+                var mask = mw != null ? mw.transform.Find("Mask") : null;
+                var u = mask != null ? mask.Find("Underlay") : null;
+                var a = mask != null ? mask.Find("Art") : null;
+                if (u != null && a != null && u.GetSiblingIndex() < a.GetSiblingIndex() && IsSprite(u, UnderArt[i])) underOk++;
+            }
+            Check("Each medallion has its own underlay under the art, inside the window mask (" + underOk + "/4)", underOk == 4);
 
             var rim = GameObject.Find("MiniWindow_0") != null ? GameObject.Find("MiniWindow_0").transform.Find("SelectedGlow") : null;
             Check("Active medallion: narrow rim glow with glints",
-                rim != null && IsSprite(rim, "UI_RimGlow") && rim.childCount >= 3);
+                rim != null && IsSprite(rim, "UI_V2_RimGlow") && rim.childCount >= 3);
 
             // Слои: подложка под анимацией, лицевой слой над ней, и ничто лицевое не заходит на анимацию.
             // Поверхность одна и та же, поэтому непересечение на листе = непересечение на экране
             var backCanvas = GameObject.Find("RightPageBack");
-            var frontCanvas = GameObject.Find("RightPageCanvas");
             int backOrder = backCanvas != null ? backCanvas.GetComponent<Canvas>().sortingOrder : int.MaxValue;
             int frontOrder = frontCanvas != null ? frontCanvas.GetComponent<Canvas>().sortingOrder : int.MinValue;
             int artOrder = surfaceArt.canvas.sortingOrder;
             Check("Decor layers: back < animation < front", backOrder < artOrder && artOrder < frontOrder);
-            int overlapping = 0;
-            if (frontCanvas != null)
-                foreach (var g in frontCanvas.GetComponentsInChildren<Graphic>())
-                    if (LocalRect(g).Overlaps(content)) { overlapping++; _report.AppendLine("  over the animation: " + g.name); }
-            Check("No front decor or text over the animation, all 36 frames (overlapping: " + overlapping + ")", overlapping == 0);
-
-            // Кнопки в стиле книги: пергаментная табличка, небольшие
-            int buttonsOk = 0;
-            foreach (var n in new[] { "Button_PlayLoop", "Button_Replay", "Button_FlipPage" })
-            {
-                var btn = FindButton(n);
-                var rt = btn != null ? (RectTransform)btn.transform : null;
-                if (btn != null && IsSprite(btn.transform, "UI_ButtonPlate") && rt.rect.width <= 240f) buttonsOk++;
-            }
-            Check("Small book-style buttons", buttonsOk == 3);
+            // Обрезка по листу: в каждом слое страницы (кроме закладок и сетки) всё лежит под одной маской размером
+            // с лист, и маска сама идёт по поверхности листа (PageWarp), то есть режет по деформированному краю
+            int clipped = 0, layers = 0, outside = 0;
+            foreach (var surface in new[] { leftSurface, rightSurface })
+                foreach (var canvasC in surface.GetComponentsInChildren<Canvas>(true))
+                {
+                    if (canvasC.name.EndsWith("Tabs") || canvasC.name.EndsWith("Grid")) continue;
+                    layers++;
+                    var clip = canvasC.transform.Find("SheetClip");
+                    var clipRt = clip != null ? (RectTransform)clip : null;
+                    bool ok = clip != null && canvasC.transform.childCount == 1 && clip.GetComponent<Mask>() != null &&
+                              clip.GetComponent<PageWarp>() != null &&
+                              Mathf.Abs(clipRt.rect.width - surface.width) < 0.5f && Mathf.Abs(clipRt.rect.height - surface.height) < 0.5f;
+                    foreach (var g in canvasC.GetComponentsInChildren<Graphic>(true))
+                        if (g.transform != clip && (clip == null || !g.transform.IsChildOf(clip))) outside++;
+                    if (ok) clipped++;
+                }
+            Check("Every page layer is clipped by the warped sheet mask, tabs excluded (" + clipped + "/" + layers + ", outside: " + outside + ")",
+                layers == 5 && clipped == layers && outside == 0 &&
+                GameObject.Find("LeftPageTabs") != null && GameObject.Find("LeftPageTabs").GetComponentInChildren<Mask>(true) == null);
+            // Кнопок и экранного UI нет — ни видимых, ни невидимых областей клика
+            Check("No Play / Replay / Next Page buttons and no screen-space UI",
+                FindObjectsByType<Button>().Length == 0 && FindAnyObjectByType<EventSystem>() == null &&
+                GameObject.Find("UI") == null);
         }
 
         // Никаких новых названий и цифр: в сцене только заданные автором тексты
         var allowed = new System.Collections.Generic.HashSet<string>
         {
-            "Ice Storm", SpellbookTextDescription(), "Mana", "Power", "Duration", "Range", "Not set",
-            "ICE MAGIC", "1", "2", "Play", "Replay", "Next Page",
+            "Mana", "Power", "Duration", "Range", "Not set",
+            "ICE MAGIC", "1", "2",
         };
+        allowed.UnionWith(SpellTitles);
+        allowed.UnionWith(SpellDescriptions);
         var stray = new System.Collections.Generic.List<string>();
         foreach (var t in FindObjectsByType<Text>())
             if (!allowed.Contains(t.text)) stray.Add(t.text);
         Check("No new names or numbers (stray texts: " + stray.Count + ")", stray.Count == 0);
         foreach (var t in stray) _report.AppendLine("  stray: " + t);
 
-        // До нажатия кадр стоит на первом
-        Sprite idle = spriteRenderer.sprite;
-        yield return new WaitForSeconds(0.5f);
-        Check("Idle before Play shows frame 0 and does not change",
-            idle == player.frames[0] && spriteRenderer.sprite == idle);
-
-        // «Проиграть цикл»: цикл длится frames / fps (4 с), с запасом проходят все кадры
-        Click("Button_PlayLoop");
+        // При открытии Ice Storm уже играет сам
+        var sel0 = FindAnyObjectByType<SpellSelector>();
+        Check("Ice Storm is selected and playing on open, no input",
+            sel0 != null && sel0.Selected == 0 && player.IsPlaying && player.frames == sel0.spells[0].frames);
         var seen = new System.Collections.Generic.HashSet<Sprite>();
         float until = Time.unscaledTime + player.frames.Length / player.fps + 0.4f;
-        while (Time.unscaledTime < until)
-        {
-            seen.Add(spriteRenderer.sprite);
-            yield return null;
-        }
-        Check("Play cycles frames (distinct seen: " + seen.Count + ")", seen.Count == player.frames.Length);
+        while (Time.unscaledTime < until) { seen.Add(spriteRenderer.sprite); yield return null; }
+        Check("Ice Storm cycles all its frames by itself (distinct seen: " + seen.Count + ")", seen.Count == player.frames.Length);
 
         string shot = Path.ChangeExtension(_reportPath, ".png");
         ScreenCapture.CaptureScreenshot(shot);
         yield return new WaitForSeconds(0.5f);
 
-        // «Повтор» — сразу первый кадр
-        Click("Button_Replay");
-        Check("Replay restarts from frame 0", spriteRenderer.sprite == player.frames[0]);
-        yield return new WaitForSeconds(0.2f);
-        Check("Animation continues after Replay", spriteRenderer.sprite != player.frames[0]);
-
-        // «Перелистнуть» неактивна
-        var flip = FindButton("Button_FlipPage");
-        Check("Flip button exists and is not interactable", flip != null && !flip.interactable);
-
         Check("No floating title above the book", GameObject.Find("Title") == null);
+
+        // Выбор медальона кликом по точке экрана: та же проверка, что у мыши в SpellSelector.Update.
+        // Перед выбором играет прежнее заклинание — оно должно остановиться без следа
+        var sel = FindAnyObjectByType<SpellSelector>();
+        var artSurface = GameObject.Find("SpellArtSurface").GetComponent<Image>();
+        var titleText = GameObject.Find("SpellTitle").GetComponent<Text>();
+        var descText = GameObject.Find("Description").GetComponent<Text>();
+        Vector2 between = (sel.ScreenCenter(0) + sel.ScreenCenter(1)) * 0.5f;
+        Check("A click between medallions selects nothing", !sel.SelectAtScreen(between) && sel.Selected == 0);
+        foreach (int i in new[] { 1, 2, 3, 0 })
+        {
+            string n = SpellTitles[i];
+            var spell = sel.spells[i];
+            yield return new WaitForSeconds(0.35f);
+            bool hit = sel.SelectAtScreen(sel.ScreenCenter(i));
+            bool glowsOk = true;
+            for (int k = 0; k < sel.glows.Length; k++) glowsOk &= sel.glows[k].activeSelf == (k == i);
+            Check(n + ": click on its medallion selects it, only its rim lit", hit && sel.Selected == i && glowsOk);
+            Check(n + ": title and description updated", titleText.text == n && descText.text == SpellDescriptions[i]);
+            Check(n + ": previous animation stopped, own clip starts at frame 0 and plays",
+                player.frames == spell.frames && player.IsPlaying &&
+                spriteRenderer.sprite == spell.frames[0] && artSurface.sprite == spell.frames[0]);
+
+            // Три полных цикла без ввода: все кадры, ни одного чужого, кадры идут только вперёд
+            // (для Absolute Zero — без обратного хода осколков), длительность цикла из задержек
+            float expected = 0f;
+            for (int k = 0; k < spell.frames.Length; k++)
+                expected += spell.frameDurations != null && spell.frameDurations.Length == spell.frames.Length
+                    ? spell.frameDurations[k] : 1f / spell.fps;
+            var index = new System.Collections.Generic.Dictionary<Sprite, int>();
+            for (int k = 0; k < spell.frames.Length; k++) index[spell.frames[k]] = k;
+            var seenSpell = new System.Collections.Generic.HashSet<Sprite>();
+            bool foreign = false, backwards = false;
+            int prev = 0, wraps = 0;
+            float t0 = Time.unscaledTime, firstWrap = -1f, lastWrap = -1f, end = t0 + 3f * expected + 0.5f;
+            while (Time.unscaledTime < end)
+            {
+                yield return null;
+                Sprite cur = spriteRenderer.sprite;
+                int idx;
+                if (!index.TryGetValue(cur, out idx) || !index.ContainsKey(artSurface.sprite)) { foreign = true; continue; }
+                seenSpell.Add(cur);
+                if (idx < prev)
+                {
+                    // назад можно только через начало цикла: с конца клипа на его первые кадры
+                    if (prev >= spell.frames.Length - 3 && idx <= 2)
+                    {
+                        wraps++;
+                        if (firstWrap < 0f) firstWrap = Time.unscaledTime; else lastWrap = Time.unscaledTime;
+                    }
+                    else backwards = true;
+                }
+                prev = idx;
+            }
+            float loopTime = wraps >= 2 ? (lastWrap - firstWrap) / (wraps - 1) : -1f;
+            _report.AppendLine("  " + n + ": " + spell.frames.Length + " frames, " + wraps + " loop restarts, loop " +
+                               loopTime.ToString("F2") + " s measured, " + expected.ToString("F2") + " s from frame delays");
+            Check(n + ": plays all its frames and no other (distinct: " + seenSpell.Count + ")",
+                seenSpell.Count == spell.frames.Length && !foreign);
+            Check(n + ": repeats by itself, at least 3 cycles, frames only move forward", wraps >= 3 && !backwards);
+            Check(n + ": loop takes its own duration", loopTime > 0f && Mathf.Abs(loopTime - expected) < 0.2f);
+        }
 
         // Запись движения: -spellbookRecord <папка> — кадры экрана с отметками времени
         string recordDir = ArgValue("-spellbookRecord");
@@ -389,18 +493,22 @@ public class SpellbookSelfTest : MonoBehaviour
         {
             Directory.CreateDirectory(recordDir);
             var times = new StringBuilder();
-            Click("Button_PlayLoop");
+            var recSel = FindAnyObjectByType<SpellSelector>();
             float t0 = Time.unscaledTime;
+            int shotIndex = 0;
+            // Каждый медальон: клик и два автоматических цикла.
             // Число кадров, а не время: если окно на миг теряет фокус, запись всё равно полная
-            for (int i = 0; i < 80; i++)
+            foreach (int i in new[] { 1, 2, 3, 0 })
             {
-                if (i == 45) { Click("Button_Replay"); times.AppendLine("replay " + (Time.unscaledTime - t0).ToString("F3")); }
-                yield return new WaitForEndOfFrame();
-                var tex = ScreenCapture.CaptureScreenshotAsTexture();
-                File.WriteAllBytes(Path.Combine(recordDir, "rec_" + i.ToString("D3") + ".jpg"), tex.EncodeToJPG(80));
-                Destroy(tex);
-                times.AppendLine(i + " " + (Time.unscaledTime - t0).ToString("F3") + " " + spriteRenderer.sprite.name);
-                yield return new WaitForSeconds(0.07f);
+                recSel.SelectAtScreen(recSel.ScreenCenter(i));
+                times.AppendLine("select " + SpellTitles[i] + " " + (Time.unscaledTime - t0).ToString("F3"));
+                var sp = recSel.spells[i];
+                float cycle = 0f;
+                for (int k = 0; k < sp.frames.Length; k++)
+                    cycle += sp.frameDurations != null && sp.frameDurations.Length == sp.frames.Length ? sp.frameDurations[k] : 1f / sp.fps;
+                // Два полных цикла — видно и стык повтора
+                float recUntil = Time.unscaledTime + 2f * cycle + 0.3f;
+                while (Time.unscaledTime < recUntil) yield return Shot(recordDir, shotIndex++, times, t0, spriteRenderer);
             }
             File.WriteAllText(Path.Combine(recordDir, "times.txt"), times.ToString());
         }
@@ -409,9 +517,60 @@ public class SpellbookSelfTest : MonoBehaviour
         Finish();
     }
 
-    // Текст описания задан автором; самопроверка — рантайм-код и не видит редакторский сборщик
-    private static string SpellbookTextDescription() =>
-        "Summons a vortex of ice shards that slows enemies in an area.";
+    // Тексты заданы автором; самопроверка — рантайм-код и не видит редакторский сборщик
+    private static readonly string[] SpellTitles = { "Ice Storm", "Frost Breath", "Ice Comet", "Absolute Zero" };
+    private static readonly string[] SpellDescriptions =
+    {
+        "Summons a vortex of ice shards that slows enemies in an area.",
+        "An icy dragon exhales a torrent of freezing breath.",
+        "A frozen comet streaks through the air, trailing ice shards.",
+        "Extreme cold freezes a knight until the figure shatters.",
+    };
+    private static readonly string[] MedalArt = { "UI_MedalStorm", "UI_MedalFrostBreath", "UI_MedalIceComet", "UI_MedalAbsoluteZero" };
+    private static readonly string[] UnderArt = { "UI_V2_UnderStorm", "UI_V2_UnderFrostBreath", "UI_V2_UnderIceComet", "UI_V2_UnderAbsoluteZero" };
+
+    // Текст в своём поле: строка без переноса не шире поля; текст с переносом — не больше maxLines строк
+    private static bool Fits(Text t, int maxLines = 1)
+    {
+        if (t == null) return false;
+        Rect r = t.rectTransform.rect;
+        if (t.horizontalOverflow == HorizontalWrapMode.Overflow)
+            return t.cachedTextGeneratorForLayout.GetPreferredWidth(t.text, t.GetGenerationSettings(Vector2.zero)) / t.pixelsPerUnit <= r.width + 0.5f;
+        var gen = new TextGenerator();
+        gen.Populate(t.text, t.GetGenerationSettings(r.size));
+        return gen.lineCount <= maxLines;
+    }
+
+    private IEnumerator Shot(string dir, int i, StringBuilder times, float t0, SpriteRenderer sr)
+    {
+        yield return new WaitForEndOfFrame();
+        var tex = ScreenCapture.CaptureScreenshotAsTexture();
+        File.WriteAllBytes(Path.Combine(dir, "rec_" + i.ToString("D3") + ".jpg"), tex.EncodeToJPG(80));
+        Destroy(tex);
+        times.AppendLine(i + " " + (Time.unscaledTime - t0).ToString("F3") + " " + sr.sprite.name);
+        yield return new WaitForSeconds(0.07f);
+    }
+
+    // Контур видимой части анимации, пропущенный через поверхность листа: правее колец корешка и внутри разворота
+    private static bool ClearsSpine(Rect content, PageSurface surface, Image art, Bounds spread)
+    {
+        float minX = float.MaxValue, maxX = float.MinValue, minY = float.MaxValue, maxY = float.MinValue;
+        var canvas = art.canvas.transform;
+        for (int k = 0; k <= 20; k++)
+        {
+            float f = k / 20f;
+            foreach (var q in new[] { new Vector2(content.xMin, Mathf.Lerp(content.yMin, content.yMax, f)),
+                                      new Vector2(content.xMax, Mathf.Lerp(content.yMin, content.yMax, f)),
+                                      new Vector2(Mathf.Lerp(content.xMin, content.xMax, f), content.yMin),
+                                      new Vector2(Mathf.Lerp(content.xMin, content.xMax, f), content.yMax) })
+            {
+                Vector3 w = canvas.TransformPoint(surface.Map(q));
+                minX = Mathf.Min(minX, w.x); maxX = Mathf.Max(maxX, w.x);
+                minY = Mathf.Min(minY, w.y); maxY = Mathf.Max(maxY, w.y);
+            }
+        }
+        return minX > spread.center.x + 0.09f && maxX < spread.max.x && minY > spread.min.y && maxY < spread.max.y;
+    }
 
 
     private static bool FontIs(string path, string fontName)
@@ -514,21 +673,6 @@ public class SpellbookSelfTest : MonoBehaviour
     {
         var planes = GeometryUtility.CalculateFrustumPlanes(cam);
         return GeometryUtility.TestPlanesAABB(planes, b);
-    }
-
-    private static Button FindButton(string name)
-    {
-        var go = GameObject.Find(name);
-        return go != null ? go.GetComponent<Button>() : null;
-    }
-
-    private void Click(string name)
-    {
-        var button = FindButton(name);
-        if (button == null) { Check("Button " + name + " exists", false); return; }
-        var data = new PointerEventData(EventSystem.current) { button = PointerEventData.InputButton.Left };
-        ExecuteEvents.Execute(button.gameObject, data, ExecuteEvents.pointerClickHandler);
-        _report.AppendLine("CLICK " + name);
     }
 
     private void Check(string label, bool ok)

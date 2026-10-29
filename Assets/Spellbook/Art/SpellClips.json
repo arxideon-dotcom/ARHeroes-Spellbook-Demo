@@ -1,0 +1,237 @@
+{
+ "region": [
+  -390.5,
+  -175.7,
+  391.9,
+  717.7
+ ],
+ "ramp": 40.0,
+ "clips": [
+  {
+   "prefix": "FrostBreath",
+   "title": "Frost Breath",
+   "description": "An icy dragon exhales a torrent of freezing breath.",
+   "source": "processing/ice_spells/fix_v1/icedragon-v1_fix_v1.apng",
+   "frames": 40,
+   "delays": [
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.22,
+    0.11,
+    0.11,
+    0.11
+   ],
+   "duration": 4.51,
+   "canvas": [
+    700,
+    700
+   ],
+   "crop": [
+    71,
+    5,
+    604,
+    690
+   ],
+   "scale": 1.2951,
+   "core": [
+    80,
+    34,
+    666,
+    666
+   ],
+   "artCenter": [
+    0.71,
+    271.0
+   ],
+   "artSize": [
+    782.21,
+    893.58
+   ]
+  },
+  {
+   "prefix": "IceComet",
+   "title": "Ice Comet",
+   "description": "A frozen comet streaks through the air, trailing ice shards.",
+   "source": "processing/ice_spells/fix_v1/icecomet-v1_fix_v1.apng",
+   "frames": 36,
+   "delays": [
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11
+   ],
+   "duration": 3.96,
+   "canvas": [
+    688,
+    699
+   ],
+   "crop": [
+    41,
+    0,
+    612,
+    692
+   ],
+   "scale": 1.2776,
+   "core": [
+    50,
+    28,
+    644,
+    657
+   ],
+   "artCenter": [
+    0.71,
+    266.53
+   ],
+   "artSize": [
+    781.9,
+    884.11
+   ]
+  },
+  {
+   "prefix": "AbsoluteZero",
+   "title": "Absolute Zero",
+   "description": "Extreme cold freezes a knight until the figure shatters.",
+   "source": "processing/ice_spells/fix_v1/frozenknight-shatter_fix_v1.apng",
+   "frames": 45,
+   "delays": [
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.36,
+    0.12,
+    0.12,
+    0.12,
+    0.12
+   ],
+   "duration": 5.64,
+   "canvas": [
+    700,
+    700
+   ],
+   "crop": [
+    68,
+    25,
+    587,
+    670
+   ],
+   "scale": 1.3333,
+   "core": [
+    100,
+    58,
+    623,
+    661
+   ],
+   "artCenter": [
+    0.71,
+    270.33
+   ],
+   "artSize": [
+    782.66,
+    893.33
+   ]
+  }
+ ]
+}

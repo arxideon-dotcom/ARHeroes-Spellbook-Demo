@@ -1,0 +1,135 @@
+{
+ "_about": "Grimoire decoration pass v2 (Oct 28 2026). Every item is generated with muse-image-1.0 (Meta Model API). Items with 'ref' go to /v1/images/edits with the reference crop(s) as style input; items without go to /v1/images/generations. Ink items are drawn on flat magenta and keyed by processing/process_spell.py; glow items are drawn on black and keyed by luminance.",
+ "_ink": "Detailed hand-drawn dark sepia-brown ink drawing in the manner of an old grimoire, fine pen strokes with varied line weight from hairline to medium, delicate hatching, connected flowing ornament, hand-made and slightly irregular, NOT a clean technical drawing, NOT 3D, NOT glossy, NOT cartoon, no thick black bars, no text, no letters, no numbers, no rows of runes. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no paper, no parchment texture, no shading, no gradient, no vignette on the background.",
+ "_ref": "Use the attached image only as a style reference for the ink technique, line quality and ornament of an old grimoire. Do not copy its layout, objects, hands, armor, people or text. Draw a new, separate image:",
+ "_glow": "Pure black background everywhere, no texture, no other objects, no text.",
+ "items": {
+  "UnderStorm": {
+   "size": "1024x1024",
+   "ref": [
+    "ref_medallion.png"
+   ],
+   "prompt": "a round ink vignette that fills one perfect circle touching all four edges of the image; outside the circle only flat magenta. Inside the circle, drawn directly on the magenta: thin spiral wind lines swirling around the centre, fine drifting snow dust specks, and a few small sketches of ice crystals and snowflakes near the rim. Airy and sparse in the middle because an illustration will cover the centre, richer detail toward the rim. Only a few tiny specks have a very faint pale ice-blue wash; everything else is sepia ink."
+  },
+  "UnderFrostBreath": {
+   "size": "1024x1024",
+   "ref": [
+    "ref_medallion.png"
+   ],
+   "prompt": "a round ink vignette that fills one perfect circle touching all four edges of the image; outside the circle only flat magenta. Inside the circle, drawn directly on the magenta: a delicate frost-fern ornament growing from the lower left rim, several flowing stream lines that start near the upper left and curve out to the right like a breath of cold air, and a few separate small snowflakes scattered in the open spaces. Sparse in the middle, richer near the rim. Only a few tiny accents have a very faint pale ice-blue wash; everything else is sepia ink."
+  },
+  "UnderIceComet": {
+   "size": "1024x1024",
+   "ref": [
+    "ref_medallion.png"
+   ],
+   "prompt": "a round ink vignette that fills one perfect circle touching all four edges of the image; outside the circle only flat magenta. Inside the circle, drawn directly on the magenta: fine parallel diagonal trajectory lines running from the upper left to the lower right, some dashed, a small star chart in the upper right with tiny stars joined by hairlines and a thin measuring circle, another tiny star group in the lower left, and scattered ice dust. Sparse in the middle, richer near the rim. Only a few tiny stars have a very faint pale ice-blue wash; everything else is sepia ink."
+  },
+  "UnderAbsoluteZero": {
+   "size": "1024x1024",
+   "ref": [
+    "ref_medallion.png"
+   ],
+   "prompt": "a round ink vignette that fills one perfect circle touching all four edges of the image; outside the circle only flat magenta. Inside the circle, drawn directly on the magenta: a fine network of thin branching cracks spreading from the centre like cracked ice, a few thin ring-shaped cracks, and delicate frost-fern patterns near the rim. Sparse in the middle, richer near the rim. Only a few tiny accents have a very faint pale ice-blue wash; everything else is sepia ink."
+  },
+  "TitleRibbon": {
+   "size": "1536x1024",
+   "ref": [
+    "ref_title.png"
+   ],
+   "prompt": "one long horizontal scroll ribbon banner drawn only with sepia ink lines, with curled rolled ends on both sides and fine hatching inside the folds. The long central face of the ribbon is completely EMPTY and NOT filled (the magenta shows through it) so a title can be placed on it. The ribbon is wide and fairly flat, about four and a half times wider than tall, centred, fully in frame."
+  },
+  "OrbitRing": {
+   "size": "1024x1024",
+   "ref": [
+    "ref_left_page.png"
+   ],
+   "prompt": "a circular astrological orbit ornament: two or three thin concentric orbit circles with small beads, tiny planets, small four-point stars and two crescent moons placed along the orbits, plus four tiny diamond nodes at top, bottom, left and right. The whole central area, about seventy percent of the diameter, is completely EMPTY magenta because a round medallion frame sits there. Evenly balanced around the centre."
+  },
+  "CenterEmblem": {
+   "size": "1024x1024",
+   "ref": [
+    "ref_left_page.png"
+   ],
+   "prompt": "a small round central emblem: a crescent moon cradling a small star inside a thin circle, surrounded by fine sun rays and a thin outer ring, with four short pointed arms ending in diamond nodes pointing up, down, left and right. Centred, fully in frame."
+  },
+  "Connector": {
+   "size": "1024x1536",
+   "ref": [
+    "ref_left_page.png"
+   ],
+   "prompt": "a vertical ornamental connector: one thin straight vertical line running almost the full height of the image, with small diamond nodes, a few beads and two small four-point stars along it, and a small pointed tip at each end. Very slender, centred."
+  },
+  "CityLeft": {
+   "size": "1536x1024",
+   "ref": [
+    "ref_left_page.png"
+   ],
+   "prompt": "a small sketch of a gothic cathedral city with tall thin spires, pointed arches and an arched bridge standing on the edge of a floating rock, drawn with sepia ink hatching. The buildings are tallest on the left side and get lower toward the right, where the sketch fades out into loose lines."
+  },
+  "CityRight": {
+   "size": "1536x1024",
+   "ref": [
+    "ref_left_page.png"
+   ],
+   "prompt": "a small sketch of a gothic cathedral city with tall thin spires, pointed arches and an arcade standing on the edge of a floating rock, drawn with sepia ink hatching. The buildings are tallest on the right side and get lower toward the left, where the sketch fades out into loose lines."
+  },
+  "Chalice": {
+   "size": "1024x1536",
+   "ref": [
+    "ref_left_page.png"
+   ],
+   "prompt": "an ornate ritual chalice holding a small flame of frozen ice crystals, on a long slender stem ending in a pointed tip, drawn with sepia ink hatching. Centred, fully in frame."
+  },
+  "Compass": {
+   "size": "1024x1024",
+   "ref": [
+    "ref_right_page.png"
+   ],
+   "prompt": "a compass rose star with eight long slender pointed rays of alternating length, a small circle at the centre and a thin outer circle crossing the rays, fine hatching on one side of each ray. Centred, fully in frame."
+  },
+  "Planets": {
+   "size": "1024x1536",
+   "ref": [
+    "ref_left_page.png"
+   ],
+   "prompt": "a vertical column of five small moon-phase discs from new moon to full moon, each lightly hatched, joined by one thin vertical line with tiny beads between them. Slender, centred, fully in frame."
+  },
+  "RightPage": {
+   "size": "1024x1536",
+   "ref": [
+    "ref_right_page.png"
+   ],
+   "prompt": "the background ink drawings for one portrait page of an old grimoire about ice magic, with NO page border and NO paper. Upper two thirds: one large thin-line magic circle diagram, slightly off-centre and partly reaching into the margins: concentric rings, a hexagram, a snowflake star in the middle, small circles at the star points and short tick marks along the outer ring. In the left and right margins: small ink studies (an ice crystal cluster, a small dragon head sketch, a comet trail sketch, a little gothic tower), small groups of abstract wavy scribble lines that only imitate handwriting with no readable letters, and a few small signs joined to the diagram by dotted lines. The bottom third of the page is almost empty and calm. Asymmetric, lively arrangement."
+  },
+  "RimGlow": {
+   "size": "1024x1024",
+   "glow": true,
+   "prompt": "A thin ring of soft warm golden light, a perfect circle centred in the image with a diameter of about ninety percent of the image width, gently glowing, slightly brighter at a few points."
+  },
+  "Sparkle": {
+   "size": "1024x1024",
+   "glow": true,
+   "prompt": "One small golden four-point sparkle star with long thin rays and a soft warm glow, centred, occupying the middle third of the image."
+  },
+  "SoftGlow": {
+   "size": "1024x1024",
+   "glow": true,
+   "prompt": "A soft round warm golden glow, brightest in the centre and fading smoothly to black, centred, the glow fades out before reaching the edges."
+  },
+  "NameRibbonWide": {
+   "size": "1536x1024",
+   "ref": [
+    "title_ribbon_v2.png"
+   ],
+   "prompt": "a long horizontal scroll ribbon for a spell name, in exactly the same hand-drawn ink style, line weight and hatching as the attached ribbon: thin brown outlines, light hatching only in the folds and the rolled curled ends. The long central face is completely EMPTY and NOT filled, no colour inside, the magenta shows through it, so the real page paper is visible. No light fill, no cast shadow, no 3D bevel, no glued parchment look. Very long and narrow: about six times wider than tall, the empty face takes about three quarters of the total width. Centred, fully in frame."
+  },
+  "NameRibbonCompact": {
+   "size": "1536x1024",
+   "ref": [
+    "name_ribbon_wide.png"
+   ],
+   "prompt": "the same ink-drawn ribbon as the attached one, same thin brown outlines, same hatching and same curled ends, but a compact version: about four times wider than tall, the empty central face about two thirds of the total width. The central face is completely EMPTY and NOT filled, the magenta shows through. No light fill, no shadow, no 3D. Centred, fully in frame."
+  }
+ }
+}

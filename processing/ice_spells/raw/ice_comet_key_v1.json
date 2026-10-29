@@ -1,0 +1,15 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "https://api.meta.ai/v1/images/edits",
+  "size": "1024x1024",
+  "inputs": [
+    "ice_storm_reference_1024.png"
+  ],
+  "prompt_file": "ice_comet_key_full.txt",
+  "prompt": "ICE COMET spell: a large comet made of faceted glowing blue ice crystals, flying diagonally. The dense solid ice core with a very bright white-blue cold glowing heart is in the lower right part of the image; the long tail trails up to the upper left. The tail is lighter and airy: streams of freezing frost energy, snow dust, small ice shards and a few soft lilac energy streaks, clearly lighter and more transparent than the dense core. No fire, no flames, no lava, no orange, no stars, no planets, no space scenery. The attached image is a STYLE REFERENCE ONLY: an ice tornado spell illustration. Do NOT copy the tornado, do NOT include any tornado or vortex, and do NOT copy its black background. Paint a NEW subject in exactly the same art style: detailed hand-painted fantasy magic illustration, bold large readable shapes, faceted translucent light-blue ice crystals with sharp facets, deep blue shadows, crisp white highlights and sparkles, small soft lilac and violet accents in the energy streaks, swirling frost streams, snowflakes, ice dust and flying ice shards, same line weight, same level of detail and same saturation as the reference. Not a minimalist icon, not a pencil sketch, not photorealistic, not 3D render. No text, no letters, no runes, no frame, no border. The background is a COMPLETELY flat, uniform, solid pure green color #00FF00 everywhere around the subject: no black, no texture, no shading, no gradient, no vignette, no glow spilling into the background, no ground plane, no scenery. The whole subject is fully inside the frame with a clear margin of green on every side, nothing is cut off by the image edges.",
+  "usage": {
+    "input_tokens": 13453,
+    "output_tokens": 1493,
+    "total_tokens": 14946
+  }
+}

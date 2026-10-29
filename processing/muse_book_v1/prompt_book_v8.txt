@@ -1,0 +1,13 @@
+Edit this exact book. Keep its camera angle, perspective, proportions,
+book thickness, cover, rings, corner fittings, textures, colors, stains
+and painterly style unchanged. Change only one thing: reduce the convex
+bulge of the two top pages by about half. The central area of each page
+looks flat and even, ready for text and a spell illustration. Keep a
+small natural curve where the pages bend into the spine, and give the
+top and bottom page edges a soft, barely noticeable arc. Keep the visible
+paper layers along the bottom and the slight perspective. Do not make
+the pages strict rectangles and do not turn the camera to a straight
+top-down view. An open book with volume and almost flat working
+surfaces. Pages stay completely empty.
+The background stays a COMPLETELY flat, uniform, solid magenta #FF00FF
+everywhere, no texture, shading, gradient or vignette.

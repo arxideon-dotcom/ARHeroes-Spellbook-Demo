@@ -1,0 +1,15 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "https://api.meta.ai/v1/images/edits",
+  "size": "1024x1024",
+  "inputs": [
+    "absolute_zero_key_v1.png"
+  ],
+  "prompt_file": "absolute_zero_fix.txt",
+  "prompt": "Keep this exact image: the same frozen knight, the same pose, the same size and position, the same ice cracks, fragments, crystals, colors and painting style. One change only: there are two helmets now; remove the separate floating helmet in the upper left completely and replace it with a few small flying ice shards and snow sparkles, so the knight has only the one helmet on his body. The frost mist at the feet is white and icy blue, never green. The background stays a COMPLETELY flat, uniform, solid pure green #00FF00, no gradient. No text.",
+  "usage": {
+    "input_tokens": 12236,
+    "output_tokens": 765,
+    "total_tokens": 13001
+  }
+}

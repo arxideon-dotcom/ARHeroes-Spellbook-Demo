@@ -1,0 +1,24 @@
+Repaint this exact book in a new visual style. Keep the geometry and
+composition identical: same camera angle, perspective, proportions,
+page positions, central spine with the same bronze rings in the same
+places, same corner fittings, same size and placement in the frame.
+Change only materials, palette, texture and detail:
+hand-painted illustration of a game asset for a dark fantasy strategy
+game, confident outlines, dense shadows in the joints, high detail,
+NOT photorealistic, NOT a smooth 3D render.
+Parchment in warm ochre-brown tones, lighter in the page centers and
+clearly darker, worn and smoke-stained toward the edges; crisp fine
+texture of paper fibres, creases and old paper; no blurry watercolor
+blotches, no cloudy yellow, no smooth creamy look. Darkening, small
+chips and tears only along the edges; the main page surfaces stay
+fairly even and free. The paper layers along the bottom and outer edges
+drawn as thin uneven dark lines, without excessive volume or bulging
+waves. Cover in very dark green-black aged leather with strong painted
+texture. Metal is dull old bronze with dark recesses and small worn
+golden highlights, no bright polished gold.
+The pages are completely empty: no text, no symbols, no illustrations,
+no decorative frames. No straps, no clasps, no new ornaments, no
+environment, no props.
+The background is a COMPLETELY flat, uniform, solid magenta color
+#FF00FF; keep it solid magenta everywhere, no texture, shading,
+gradient or vignette.

@@ -1,0 +1,8 @@
+Keep this exact parchment disc, its circles, star, colors and letter style.
+Fix only the ring of letters: it must read exactly the 26 English capital
+letters in order clockwise starting from A at the top: A B C D E F G H I J
+K L M N O P Q R S T U V W X Y Z. The letter V is missing between U and W:
+add it and respace all 26 letters evenly around the ring. Every letter
+complete, upright serif capitals, clearly legible, no extra letters, no
+symbols, no numbers. The background stays a COMPLETELY flat, uniform,
+solid magenta #FF00FF everywhere.

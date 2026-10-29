@@ -1,0 +1,21 @@
+Image 1 is a reference for page flatness and camera angle only. Image 2
+is the current book to fix. Keep image 2's art style exactly: its
+parchment, dark green-black leather, bronze rings and corner fittings,
+texture and palette. Do NOT copy image 1's straps, clasps or tabs.
+Change the page geometry, like image 1: the book is opened almost 180
+degrees and both pages lie flat on the cover, with no convex hump. Each
+page has a large even rectangular area, at least 80 percent of the page
+width and height, ready for text or an animated spell. The top and
+bottom edges of the pages are almost straight and parallel, no strong
+arcs. A small bend only in a narrow strip next to the spine and at the
+very edges. No wide light gradients that make the surface look curved;
+even, uniform lighting across each page with only slight darkening at
+the edges. Camera almost straight top-down, minimal perspective
+foreshortening. Show the book's thickness with thin stacked paper layers
+under the top pages along the edges, not by bending the working pages.
+A flat rectangle overlaid on each page must match the paper surface
+without bending.
+Pages completely empty: no text, symbols, spells or ornaments. No new
+objects.
+The background is a COMPLETELY flat, uniform, solid magenta #FF00FF
+everywhere, no texture, shading, gradient or vignette.

@@ -1,0 +1,19 @@
+Image 1 is the book to edit. Image 2 is a material reference only.
+Keep image 1 unchanged in shape, camera angle, composition, rings,
+cover, corner fittings and overall painterly style; change only the
+three points below. Do NOT copy image 2's shape, straps or clasps.
+1. Stronger tonal volume of the parchment, like the paper in image 2:
+a light warm clean center on each page, a smooth gradual brown
+darkening toward the outer edges, and a deeper soft shadow where the
+pages curve into the spine. Keep the page centers clean and empty for
+content.
+2. Remove the symmetric clusters of stains in both bottom corners. Make
+the wear sparse and irregular: a few small scattered stains and scuffs,
+placed differently on the left and the right page, mostly near edges.
+3. On the bottom page edges, soften the dark parallel lines: show many
+thin uneven paper layers through alternating soft shadows and small
+light edge highlights, not dark stripes.
+Do not add overall sharpening, noise, grain or new outlines. Pages stay
+completely empty: no text, symbols or ornaments.
+The background stays a COMPLETELY flat, uniform, solid magenta #FF00FF
+everywhere, no texture, shading, gradient or vignette.

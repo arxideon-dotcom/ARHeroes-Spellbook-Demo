@@ -1,0 +1,811 @@
+{
+ "source_dir": "C:\\Users\\Mefisto\\ARHeroes-Spellbook-Demo\\processing\\ice_spells\\apng",
+ "clips": [
+  {
+   "prefix": "FrostBreath",
+   "source": "icedragon-v1.apng",
+   "output": "icedragon-v1_fix_v1.apng",
+   "frames": 40,
+   "source_frames": 36,
+   "delays": [
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.22,
+    0.11,
+    0.11,
+    0.11
+   ],
+   "duration": 4.51,
+   "source_duration": 3.96,
+   "sequence": [
+    "frame 0",
+    "frame 1",
+    "frame 2",
+    "frame 3",
+    "frame 4",
+    "frame 5",
+    "frame 6",
+    "frame 7",
+    "frame 8",
+    "frame 9",
+    "frame 10",
+    "frame 11",
+    "frame 12",
+    "frame 13",
+    "frame 14",
+    "frame 15",
+    "frame 16",
+    "frame 17",
+    "frame 18",
+    "frame 19",
+    "frame 20",
+    "frame 21",
+    "frame 22",
+    "frame 23",
+    "frame 24",
+    "frame 25",
+    "frame 26",
+    "frame 27",
+    "frame 28",
+    "frame 29",
+    "frame 30",
+    "frame 31",
+    "frame 32",
+    "frame 33",
+    "frame 34",
+    "frame 35",
+    "transparent pause",
+    "frame 0 at alpha x0.25",
+    "frame 0 at alpha x0.50",
+    "frame 0 at alpha x0.75"
+   ],
+   "params": {
+    "haze": [
+     28,
+     29,
+     30,
+     31,
+     32,
+     33,
+     34,
+     35
+    ],
+    "despill": true,
+    "edges": {
+     "right": 120,
+     "bottom": 80,
+     "top": 70,
+     "left": 40
+    },
+    "fade_out": {
+     "32": 0.82,
+     "33": 0.6,
+     "34": 0.36,
+     "35": 0.14
+    },
+    "pause": 0.22,
+    "fade_in": [
+     0.25,
+     0.5,
+     0.75
+    ]
+   },
+   "stats": [
+    {
+     "frame": 0,
+     "despill_px": 14843
+    },
+    {
+     "frame": 1,
+     "despill_px": 13235
+    },
+    {
+     "frame": 2,
+     "despill_px": 14122
+    },
+    {
+     "frame": 3,
+     "despill_px": 13722
+    },
+    {
+     "frame": 4,
+     "despill_px": 13170
+    },
+    {
+     "frame": 5,
+     "despill_px": 14111
+    },
+    {
+     "frame": 6,
+     "despill_px": 13687
+    },
+    {
+     "frame": 7,
+     "despill_px": 14944
+    },
+    {
+     "frame": 8,
+     "despill_px": 15039
+    },
+    {
+     "frame": 9,
+     "despill_px": 14749
+    },
+    {
+     "frame": 10,
+     "despill_px": 15617
+    },
+    {
+     "frame": 11,
+     "despill_px": 18795
+    },
+    {
+     "frame": 12,
+     "despill_px": 16855
+    },
+    {
+     "frame": 13,
+     "despill_px": 17274
+    },
+    {
+     "frame": 14,
+     "despill_px": 19233
+    },
+    {
+     "frame": 15,
+     "despill_px": 18054
+    },
+    {
+     "frame": 16,
+     "despill_px": 19667
+    },
+    {
+     "frame": 17,
+     "despill_px": 18557
+    },
+    {
+     "frame": 18,
+     "despill_px": 15689
+    },
+    {
+     "frame": 19,
+     "despill_px": 18007
+    },
+    {
+     "frame": 20,
+     "despill_px": 16374
+    },
+    {
+     "frame": 21,
+     "despill_px": 15450
+    },
+    {
+     "frame": 22,
+     "despill_px": 16522
+    },
+    {
+     "frame": 23,
+     "despill_px": 16981
+    },
+    {
+     "frame": 24,
+     "despill_px": 15285
+    },
+    {
+     "frame": 25,
+     "despill_px": 16095
+    },
+    {
+     "frame": 26,
+     "despill_px": 15358
+    },
+    {
+     "frame": 27,
+     "despill_px": 15049
+    },
+    {
+     "frame": 28,
+     "haze_px": 120620,
+     "despill_px": 24880
+    },
+    {
+     "frame": 29,
+     "haze_px": 124670,
+     "despill_px": 32548
+    },
+    {
+     "frame": 30,
+     "haze_px": 140523,
+     "despill_px": 28393
+    },
+    {
+     "frame": 31,
+     "haze_px": 138684,
+     "despill_px": 30796
+    },
+    {
+     "frame": 32,
+     "haze_px": 118591,
+     "despill_px": 35239
+    },
+    {
+     "frame": 33,
+     "haze_px": 94910,
+     "despill_px": 31659
+    },
+    {
+     "frame": 34,
+     "haze_px": 71748,
+     "despill_px": 27975
+    },
+    {
+     "frame": 35,
+     "haze_px": 58466,
+     "despill_px": 21953
+    }
+   ]
+  },
+  {
+   "prefix": "IceComet",
+   "source": "icecomet-v1.apng",
+   "output": "icecomet-v1_fix_v1.apng",
+   "frames": 36,
+   "source_frames": 36,
+   "delays": [
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11,
+    0.11
+   ],
+   "duration": 3.96,
+   "source_duration": 3.96,
+   "sequence": [
+    "frame 0",
+    "frame 1",
+    "frame 2",
+    "frame 3",
+    "frame 4",
+    "frame 5",
+    "frame 6",
+    "frame 7",
+    "frame 8",
+    "frame 9",
+    "frame 10",
+    "frame 11",
+    "frame 12",
+    "frame 13",
+    "frame 14",
+    "frame 15",
+    "frame 16",
+    "frame 17",
+    "frame 18",
+    "frame 19",
+    "frame 20",
+    "frame 21",
+    "frame 22",
+    "frame 23",
+    "frame 24",
+    "frame 25",
+    "frame 26",
+    "frame 27",
+    "frame 28",
+    "frame 29",
+    "frame 30",
+    "frame 31",
+    "frame 32",
+    "frame 33",
+    "frame 34",
+    "frame 35"
+   ],
+   "params": {
+    "haze": [],
+    "despill": true,
+    "edges": {},
+    "fade_out": {},
+    "pause": 0.0,
+    "fade_in": []
+   },
+   "stats": [
+    {
+     "frame": 0,
+     "despill_px": 8650
+    },
+    {
+     "frame": 1,
+     "despill_px": 8766
+    },
+    {
+     "frame": 2,
+     "despill_px": 9868
+    },
+    {
+     "frame": 3,
+     "despill_px": 12139
+    },
+    {
+     "frame": 4,
+     "despill_px": 9313
+    },
+    {
+     "frame": 5,
+     "despill_px": 10131
+    },
+    {
+     "frame": 6,
+     "despill_px": 10072
+    },
+    {
+     "frame": 7,
+     "despill_px": 9802
+    },
+    {
+     "frame": 8,
+     "despill_px": 10578
+    },
+    {
+     "frame": 9,
+     "despill_px": 10407
+    },
+    {
+     "frame": 10,
+     "despill_px": 10005
+    },
+    {
+     "frame": 11,
+     "despill_px": 10388
+    },
+    {
+     "frame": 12,
+     "despill_px": 9416
+    },
+    {
+     "frame": 13,
+     "despill_px": 10413
+    },
+    {
+     "frame": 14,
+     "despill_px": 11473
+    },
+    {
+     "frame": 15,
+     "despill_px": 11757
+    },
+    {
+     "frame": 16,
+     "despill_px": 12185
+    },
+    {
+     "frame": 17,
+     "despill_px": 10191
+    },
+    {
+     "frame": 18,
+     "despill_px": 10582
+    },
+    {
+     "frame": 19,
+     "despill_px": 11554
+    },
+    {
+     "frame": 20,
+     "despill_px": 10301
+    },
+    {
+     "frame": 21,
+     "despill_px": 10925
+    },
+    {
+     "frame": 22,
+     "despill_px": 10097
+    },
+    {
+     "frame": 23,
+     "despill_px": 10213
+    },
+    {
+     "frame": 24,
+     "despill_px": 11899
+    },
+    {
+     "frame": 25,
+     "despill_px": 12197
+    },
+    {
+     "frame": 26,
+     "despill_px": 12242
+    },
+    {
+     "frame": 27,
+     "despill_px": 10774
+    },
+    {
+     "frame": 28,
+     "despill_px": 11392
+    },
+    {
+     "frame": 29,
+     "despill_px": 21743
+    },
+    {
+     "frame": 30,
+     "despill_px": 28063
+    },
+    {
+     "frame": 31,
+     "despill_px": 25613
+    },
+    {
+     "frame": 32,
+     "despill_px": 20244
+    },
+    {
+     "frame": 33,
+     "despill_px": 23699
+    },
+    {
+     "frame": 34,
+     "despill_px": 20956
+    },
+    {
+     "frame": 35,
+     "despill_px": 10121
+    }
+   ]
+  },
+  {
+   "prefix": "AbsoluteZero",
+   "source": "frozenknight-shatter.apng",
+   "output": "frozenknight-shatter_fix_v1.apng",
+   "frames": 45,
+   "source_frames": 40,
+   "delays": [
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.12,
+    0.36,
+    0.12,
+    0.12,
+    0.12,
+    0.12
+   ],
+   "duration": 5.64,
+   "source_duration": 4.8,
+   "sequence": [
+    "frame 0",
+    "frame 1",
+    "frame 2",
+    "frame 3",
+    "frame 4",
+    "frame 5",
+    "frame 6",
+    "frame 7",
+    "frame 8",
+    "frame 9",
+    "frame 10",
+    "frame 11",
+    "frame 12",
+    "frame 13",
+    "frame 14",
+    "frame 15",
+    "frame 16",
+    "frame 17",
+    "frame 18",
+    "frame 19",
+    "frame 20",
+    "frame 21",
+    "frame 22",
+    "frame 23",
+    "frame 24",
+    "frame 25",
+    "frame 26",
+    "frame 27",
+    "frame 28",
+    "frame 29",
+    "frame 30",
+    "frame 31",
+    "frame 32",
+    "frame 33",
+    "frame 34",
+    "frame 35",
+    "frame 36",
+    "frame 37",
+    "frame 38",
+    "frame 39",
+    "transparent pause",
+    "frame 0 at alpha x0.20",
+    "frame 0 at alpha x0.40",
+    "frame 0 at alpha x0.60",
+    "frame 0 at alpha x0.80"
+   ],
+   "params": {
+    "haze": [],
+    "despill": true,
+    "edges": {
+     "right": 90,
+     "left": 90,
+     "top": 90,
+     "bottom": 50
+    },
+    "fade_out": {
+     "35": 0.8,
+     "36": 0.6,
+     "37": 0.4,
+     "38": 0.22,
+     "39": 0.08
+    },
+    "pause": 0.36,
+    "fade_in": [
+     0.2,
+     0.4,
+     0.6,
+     0.8
+    ]
+   },
+   "stats": [
+    {
+     "frame": 0,
+     "despill_px": 17462
+    },
+    {
+     "frame": 1,
+     "despill_px": 15155
+    },
+    {
+     "frame": 2,
+     "despill_px": 13924
+    },
+    {
+     "frame": 3,
+     "despill_px": 14293
+    },
+    {
+     "frame": 4,
+     "despill_px": 14431
+    },
+    {
+     "frame": 5,
+     "despill_px": 14444
+    },
+    {
+     "frame": 6,
+     "despill_px": 14431
+    },
+    {
+     "frame": 7,
+     "despill_px": 14431
+    },
+    {
+     "frame": 8,
+     "despill_px": 14361
+    },
+    {
+     "frame": 9,
+     "despill_px": 14386
+    },
+    {
+     "frame": 10,
+     "despill_px": 14425
+    },
+    {
+     "frame": 11,
+     "despill_px": 14376
+    },
+    {
+     "frame": 12,
+     "despill_px": 14315
+    },
+    {
+     "frame": 13,
+     "despill_px": 14959
+    },
+    {
+     "frame": 14,
+     "despill_px": 16159
+    },
+    {
+     "frame": 15,
+     "despill_px": 16303
+    },
+    {
+     "frame": 16,
+     "despill_px": 16178
+    },
+    {
+     "frame": 17,
+     "despill_px": 16024
+    },
+    {
+     "frame": 18,
+     "despill_px": 15957
+    },
+    {
+     "frame": 19,
+     "despill_px": 15805
+    },
+    {
+     "frame": 20,
+     "despill_px": 15766
+    },
+    {
+     "frame": 21,
+     "despill_px": 15719
+    },
+    {
+     "frame": 22,
+     "despill_px": 15849
+    },
+    {
+     "frame": 23,
+     "despill_px": 15751
+    },
+    {
+     "frame": 24,
+     "despill_px": 15777
+    },
+    {
+     "frame": 25,
+     "despill_px": 15812
+    },
+    {
+     "frame": 26,
+     "despill_px": 16693
+    },
+    {
+     "frame": 27,
+     "despill_px": 26486
+    },
+    {
+     "frame": 28,
+     "despill_px": 29463
+    },
+    {
+     "frame": 29,
+     "despill_px": 31767
+    },
+    {
+     "frame": 30,
+     "despill_px": 32954
+    },
+    {
+     "frame": 31,
+     "despill_px": 28729
+    },
+    {
+     "frame": 32,
+     "despill_px": 31771
+    },
+    {
+     "frame": 33,
+     "despill_px": 29690
+    },
+    {
+     "frame": 34,
+     "despill_px": 26421
+    },
+    {
+     "frame": 35,
+     "despill_px": 28036
+    },
+    {
+     "frame": 36,
+     "despill_px": 25774
+    },
+    {
+     "frame": 37,
+     "despill_px": 22897
+    },
+    {
+     "frame": 38,
+     "despill_px": 22649
+    },
+    {
+     "frame": 39,
+     "despill_px": 21071
+    }
+   ]
+  }
+ ]
+}

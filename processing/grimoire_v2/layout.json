@@ -1,0 +1,128 @@
+{
+ "OrbitRing": {
+  "size": [
+   1539,
+   1513
+  ],
+  "empty_r": 435.0,
+  "outer_r": 762.5
+ },
+ "TitleRibbon": {
+  "size": [
+   1855,
+   498
+  ],
+  "band_top": 161,
+  "band_bottom": 384,
+  "band_left": 334,
+  "band_right": 1577
+ },
+ "CenterEmblem": {
+  "size": [
+   1502,
+   1488
+  ],
+  "export": [
+   699,
+   692
+  ]
+ },
+ "Connector": {
+  "size": [
+   122,
+   1854
+  ],
+  "export": [
+   81,
+   1231
+  ]
+ },
+ "CityLeft": {
+  "size": [
+   1728,
+   1271
+  ],
+  "export": [
+   840,
+   618
+  ]
+ },
+ "CityRight": {
+  "size": [
+   1820,
+   1244
+  ],
+  "export": [
+   840,
+   574
+  ]
+ },
+ "Chalice": {
+  "size": [
+   1002,
+   1851
+  ],
+  "export": [
+   240,
+   443
+  ]
+ },
+ "Compass": {
+  "size": [
+   1552,
+   1524
+  ],
+  "export": [
+   360,
+   354
+  ]
+ },
+ "Planets": {
+  "size": [
+   369,
+   1821
+  ],
+  "export": [
+   132,
+   651
+  ]
+ },
+ "RightPage": {
+  "size": [
+   1280,
+   1920
+  ]
+ },
+ "RightNotesSpine": {
+  "export": [
+   242,
+   780
+  ]
+ },
+ "NameRibbon": {
+  "wide": {
+   "size": [
+    1827,
+    470
+   ],
+   "face": [
+    273,
+    130,
+    1581,
+    372
+   ]
+  },
+  "compact": {
+   "size": [
+    1736,
+    470
+   ],
+   "face": [
+    274,
+    131,
+    1489,
+    372
+   ]
+  }
+ }
+}

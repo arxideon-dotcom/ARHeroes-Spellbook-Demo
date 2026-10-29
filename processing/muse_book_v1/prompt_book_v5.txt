@@ -1,0 +1,23 @@
+Image 1 is the book to edit. Image 2 is a STYLE reference only.
+Keep image 1's geometry exactly: same silhouette, camera angle,
+perspective, proportions, page shapes, central spine, the same bronze
+rings in the same places, same corner fittings, same size and placement
+in the frame. Do NOT copy image 2's shape, straps, clasps, buckles or
+tabs; copy only its surface rendering of paper, leather, metal and light.
+Remove the comic style of image 1: no uniform black outlines, no drawn
+black scratch marks, no angular flat color patches, no flat fill.
+Repaint as a detailed painterly game item from a classic fantasy
+strategy game, like image 2: soft painterly volume and rich material
+texture. Paper: fine fibrous, slightly speckled texture with smooth
+gradients from a light warm center to darkened brown edges; no large
+polygonal strokes, no watercolor blotches. Wear: small natural scuffs,
+crumbling and stains, mostly along the edges; no scattered black strokes.
+Edges read through color, material thickness and shadow, not black
+lines. Page edges: many thin uneven paper layers with soft highlights and
+deep narrow shadows between them, not thick black parallel lines.
+Leather: dark green-black with fine cracks, scuffs and soft volume.
+Metal: old bronze with rounded highlights, patina and dark recesses.
+Not comic, not cel shading, not low-poly, not vector art, not a photo.
+Pages completely empty: no text, symbols, ornaments or new objects.
+The background is a COMPLETELY flat, uniform, solid magenta #FF00FF
+everywhere, no texture, shading, gradient or vignette.

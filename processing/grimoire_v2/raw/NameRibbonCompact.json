@@ -1,0 +1,16 @@
+{
+ "model": "muse-image-1.0",
+ "endpoint": "https://api.meta.ai/v1/images/edits",
+ "size": "1536x1024",
+ "inputs": [
+  "name_ribbon_wide.png"
+ ],
+ "prompt": "Use the attached image only as a style reference for the ink technique, line quality and ornament of an old grimoire. Do not copy its layout, objects, hands, armor, people or text. Draw a new, separate image: the same ink-drawn ribbon as the attached one, same thin brown outlines, same hatching and same curled ends, but a compact version: about four times wider than tall, the empty central face about two thirds of the total width. The central face is completely EMPTY and NOT filled, the magenta shows through. No light fill, no shadow, no 3D. Centred, fully in frame. Detailed hand-drawn dark sepia-brown ink drawing in the manner of an old grimoire, fine pen strokes with varied line weight from hairline to medium, delicate hatching, connected flowing ornament, hand-made and slightly irregular, NOT a clean technical drawing, NOT 3D, NOT glossy, NOT cartoon, no thick black bars, no text, no letters, no numbers, no rows of runes. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no paper, no parchment texture, no shading, no gradient, no vignette on the background.",
+ "usage": {
+  "input_tokens": 22428,
+  "output_tokens": 2055,
+  "total_tokens": 24483
+ },
+ "seconds": 23.8,
+ "time": "2026-10-28 22:19:21"
+}

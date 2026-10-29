@@ -1,0 +1,15 @@
+{
+  "model": "muse-image-1.0",
+  "endpoint": "https://api.meta.ai/v1/images/edits",
+  "size": "1024x1024",
+  "inputs": [
+    "ice_comet_pad.png"
+  ],
+  "prompt_file": "ice_comet_fix.txt",
+  "prompt": "Keep this exact image: the same ice comet, the same faceted crystal core, the same size and position, the same colors and painting style. Two changes only: 1) the tail is currently cut off by the top left border; continue the tail into the empty green area so its frost streams, snow dust and small shards thin out and fade softly before reaching the top and left edges, the whole tail fully inside the image. 2) the glowing heart of the core must NOT be heart-shaped: make the bright white-blue light at the center of the core a round radiant burst of cold light with small star sparkles. The snow and mist are white and icy blue, never green. The background stays a COMPLETELY flat, uniform, solid pure green #00FF00, no gradient. No text.",
+  "usage": {
+    "input_tokens": 21472,
+    "output_tokens": 1599,
+    "total_tokens": 23071
+  }
+}

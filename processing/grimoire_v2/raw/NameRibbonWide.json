@@ -1,0 +1,16 @@
+{
+ "model": "muse-image-1.0",
+ "endpoint": "https://api.meta.ai/v1/images/edits",
+ "size": "1536x1024",
+ "inputs": [
+  "title_ribbon_v2.png"
+ ],
+ "prompt": "Use the attached image only as a style reference for the ink technique, line quality and ornament of an old grimoire. Do not copy its layout, objects, hands, armor, people or text. Draw a new, separate image: a long horizontal scroll ribbon for a spell name, in exactly the same hand-drawn ink style, line weight and hatching as the attached ribbon: thin brown outlines, light hatching only in the folds and the rolled curled ends. The long central face is completely EMPTY and NOT filled, no colour inside, the magenta shows through it, so the real page paper is visible. No light fill, no cast shadow, no 3D bevel, no glued parchment look. Very long and narrow: about six times wider than tall, the empty face takes about three quarters of the total width. Centred, fully in frame. Detailed hand-drawn dark sepia-brown ink drawing in the manner of an old grimoire, fine pen strokes with varied line weight from hairline to medium, delicate hatching, connected flowing ornament, hand-made and slightly irregular, NOT a clean technical drawing, NOT 3D, NOT glossy, NOT cartoon, no thick black bars, no text, no letters, no numbers, no rows of runes. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no paper, no parchment texture, no shading, no gradient, no vignette on the background.",
+ "usage": {
+  "input_tokens": 12878,
+  "output_tokens": 1080,
+  "total_tokens": 13958
+ },
+ "seconds": 12.5,
+ "time": "2026-10-28 22:18:57"
+}

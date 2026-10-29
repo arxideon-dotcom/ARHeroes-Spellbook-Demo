@@ -1,0 +1,14 @@
+{
+ "model": "muse-image-1.0",
+ "endpoint": "https://api.meta.ai/v1/images/generations",
+ "size": "1024x1024",
+ "inputs": [],
+ "prompt": "A soft round warm golden glow, brightest in the centre and fading smoothly to black, centred, the glow fades out before reaching the edges. Pure black background everywhere, no texture, no other objects, no text.",
+ "usage": {
+  "input_tokens": 25584,
+  "output_tokens": 1377,
+  "total_tokens": 26961
+ },
+ "seconds": 19.3,
+ "time": "2026-10-28 21:34:58"
+}

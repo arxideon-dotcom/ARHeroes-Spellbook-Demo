@@ -1,0 +1,16 @@
+{
+ "model": "muse-image-1.0",
+ "endpoint": "https://api.meta.ai/v1/images/edits",
+ "size": "1024x1024",
+ "inputs": [
+  "ref_medallion.png"
+ ],
+ "prompt": "Use the attached image only as a style reference for the ink technique, line quality and ornament of an old grimoire. Do not copy its layout, objects, hands, armor, people or text. Draw a new, separate image: a round ink vignette that fills one perfect circle touching all four edges of the image; outside the circle only flat magenta. Inside the circle, drawn directly on the magenta: thin spiral wind lines swirling around the centre, fine drifting snow dust specks, and a few small sketches of ice crystals and snowflakes near the rim. Airy and sparse in the middle because an illustration will cover the centre, richer detail toward the rim. Only a few tiny specks have a very faint pale ice-blue wash; everything else is sepia ink. Detailed hand-drawn dark sepia-brown ink drawing in the manner of an old grimoire, fine pen strokes with varied line weight from hairline to medium, delicate hatching, connected flowing ornament, hand-made and slightly irregular, NOT a clean technical drawing, NOT 3D, NOT glossy, NOT cartoon, no thick black bars, no text, no letters, no numbers, no rows of runes. The background is a COMPLETELY flat, uniform, solid magenta color #FF00FF everywhere, no paper, no parchment texture, no shading, no gradient, no vignette on the background.",
+ "usage": {
+  "input_tokens": 30030,
+  "output_tokens": 2610,
+  "total_tokens": 32640
+ },
+ "seconds": 28.4,
+ "time": "2026-10-28 21:29:11"
+}

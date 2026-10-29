@@ -1,71 +1,81 @@
 # ARHeroes — Living Spellbook Demo
 
-A hackathon demo: one interactive spellbook page, built end to end with Meta's
-models. Open the book, press Play, and the spell animation loops on the page.
-
-> Status: placeholder build. The scene, UI and loop player work; the test
-> frames in `Assets/Spellbook/Frames/` are temporary solid-color placeholders
-> and will be replaced by real generated frames (see Provenance).
+A hackathon demo: an open grimoire on a wooden table. The left page shows four Ice Magic spells as
+medallions; the right page plays the selected spell's animation in an endless loop, with its title,
+description and stats. There are no buttons: Ice Storm starts by itself, and clicking a medallion
+switches the spell and starts its animation from the first frame.
 
 ## The idea: problem → Meta work → new result
 
 - **Problem.** An indie dev with no art team needs a living, animated spellbook
   for a VR/MR strategy game — art that moves, not static pictures.
-- **Work with Meta.** Spell art is generated with Meta's models through the
-  Meta Model API, then processed with a reproducible pipeline (below) and
-  placed into a working Unity demo.
-- **New result.** A playable book page: generated art, transparent loop
-  animation, and buttons that actually control it — not a video of an effect.
+- **Work with Meta.** The book, the page decoration and the Ice Storm animation are generated with
+  Meta's `muse-image-1.0` through the Meta Model API, then processed with a reproducible pipeline
+  (below) and placed into a working Unity demo.
+- **New result.** A playable book: four looping spell animations on the page surface, selected by
+  clicking the medallions — not a video of an effect.
 
 ## Built with Meta
 
-- **Model:** Muse Image via the Meta Model API — TODO: confirm exact model id
-  after the first generation run.
-- **What Meta made:** the spell artwork/frames. Assembly, background removal,
-  loop preparation and Unity integration are this project's own code, listed
-  below, and are described as such — never as model output.
+- **Model:** `muse-image-1.0` (Meta Model API, `/v1/images/generations` and `/v1/images/edits`).
+- **What Meta made:** the book spread, the table, the Ice Storm frames and every visible page
+  decoration (frames, ribbons, tabs, glyphs, stat icons, ornaments, medallion underlays, page drawings,
+  glows). The per-asset table is in `processing/ASSET_PROVENANCE.md`.
+- **Not made by Meta:** the Frost Breath, Ice Comet and Absolute Zero animations are APNG files provided
+  by the author (cleaned locally, see below); the book's contact shadow and the invisible masks are
+  drawn by code; all text is editable Unity text in SIL OFL fonts (IM FELL English SC / Italic,
+  EB Garamond SemiBold). Keying, cleanup, cropping, layout and Unity integration are this project's
+  own code and are described as such — never as model output.
 
 ## Pipeline (reproducible)
 
-1. Generate the spell art on a solid magenta `#FF00FF` background.
-2. `processing/process_spell.py` — magenta keying into transparency:
-   magenta-ness = `min(R, B) - G`, smoothstep 30→110 (low threshold on
-   purpose: higher values eat dark ink edges), despill on edge pixels,
-   canvas size never changed so frames stay aligned.
-3. Transparent PNG frames go to `Assets/Spellbook/Frames/`.
-4. `Assets/Spellbook/Scripts/LoopPlayer.cs` cycles the frames
-   (12 fps, seamless loop) on the right page of the book.
+1. Generate on a flat magenta `#FF00FF` background (glows on black). Prompts, raw results and a JSON
+   per request (model, endpoint, prompt, inputs, time) are kept in `processing/`:
+   `muse_book_v1/` (spread), `muse_ui_v1/` + `ui_prompts.json` (first UI pass),
+   `grimoire_v2/` (decoration pass: `prompts.json`, `muse_gen.py`, `raw/`).
+2. `processing/process_spell.py` keys the magenta into transparency; `grimoire_v2/make_grimoire_v2.py`
+   and `make_name_ribbons.py` recolour ink to one sepia scale (no magenta fringe) and export sprites.
+3. Provided APNGs: `processing/ice_spells/extract_apng.py` composites the frames (blend/dispose, own
+   delays); `fix_apng_v1.py` softens canvas-edge cuts, removes the dark ghost haze and the green key
+   fringe, adds fade-out / pause / fade-in loops; `layout_frames_v2.py` sizes each clip by its main figure.
+4. `Assets/Spellbook/Editor/SpellbookSceneBuilder.cs` (menu Spellbook ▸ Build Scene / Build Windows
+   Player) builds the whole scene: every page element goes through one page surface
+   (`PageSurface` + `PageWarp`) and is clipped by the warped sheet, so it follows the painted paper.
 
 ## How to run
 
 - **In the Editor:** open the project in Unity 6000.4.9f1, open
   `Assets/Spellbook/Scenes/SpellbookScene.unity`, press Play.
-- **Standalone:** run the Windows build — TODO: release link.
-- **Controls:** `Проиграть цикл` plays the loop from frame 0,
-  `Повтор` restarts it, `Перелистнуть` is disabled until pages 2–3 exist.
+- **Standalone:** `Builds/Windows/ARHeroes-Spellbook-Demo.exe` (git-ignored; release link — TODO).
+- **Controls:** click a medallion on the left page to switch the spell. Ice Storm plays on start;
+  every spell loops endlessly.
+- **Self-test:** `ARHeroes-Spellbook-Demo.exe -spellbookSelfTest report.txt [-spellbookRecord dir]`
+  checks auto-start, selection of all four spells by screen clicks, three loops each, layout, clipping
+  and fonts, then quits. Keep the window in focus: an unfocused player pauses.
 
 ## Project structure
 
 ```
 Assets/Spellbook/
-  Scenes/  SpellbookScene.unity (only start scene)
-  Scripts/ LoopPlayer.cs (frame loop player)
+  Scenes/  SpellbookScene.unity (only start scene, generated by the builder)
+  Scripts/ LoopPlayer.cs (frame loop, per-frame delays), SpellSelector.cs (medallion clicks),
+           PageSurface.cs / PageWarp.cs (page geometry), SpriteMirror.cs,
            SpellbookSelfTest.cs (runs only with -spellbookSelfTest)
-  Editor/  SpellbookSceneBuilder.cs (Spellbook menu: rebuild scene/player)
-  Frames/  spell animation frames (transparent PNG, Sprite)
-  Art/     page/cover materials (placeholder colors for now)
-processing/  process_spell.py (magenta keying -> transparent frames)
-Builds/    Windows player (git-ignored, distributed via release)
+  Editor/  SpellbookSceneBuilder.cs
+  Frames/  animation frames of the four spells (transparent PNG)
+  Art/     Spellbook_Spread_v8.png, PageSurfaces.json, SpellClips.json (titles, descriptions, delays, layout)
+  UI/      page sprites (UI_V2_* = decoration pass v2)
+  Fonts/   OFL fonts with licences
+processing/  generation, keying and layout scripts, prompts, raw generations, provenance
+Builds/    Windows player (git-ignored)
 ```
 
 ## Provenance: what is new here
 
-Everything in this repo except the Unity URP template files was created
-during the Meta Global AI Developer Hackathon window
-(Oct 26 – Nov 4, 2026). No artwork, code or scenes from the existing ARHeroes
-game were reused. The placeholder frames and placeholder materials are
-temporary test assets, clearly named `PLACEHOLDER_*`, and are replaced by
-real hackathon-generated frames in a separate commit.
+Everything in this repo except the Unity URP template files was created during the Meta Global AI
+Developer Hackathon window (Oct 26 – Nov 4, 2026). No artwork, code or scenes from the existing
+ARHeroes game were reused. The API key is read from the `META_MODEL_API_KEY` environment variable and
+is never stored in the repository.
 
 ## Submission
 

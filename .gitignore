@@ -107,3 +107,8 @@ InitTestScene*.unity*
 
 # Auto-generated cache in Assets folder
 /[Aa]ssets/[Ss]ceneDependencyCache*
+
+# Local-only processing artefacts
+processing/__pycache__/
+processing/**/__pycache__/
+processing/backup_pre_grimoire_v2/
