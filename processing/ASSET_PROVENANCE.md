@@ -67,7 +67,9 @@ Backup of these sprites, the previous scene and builder: processing/backup_pre_g
 
 19 items (17 + NameRibbonWide/NameRibbonCompact) + 1 retry (CenterEmblem returned HTTP 500 once), all `muse-image-1.0`; per-item JSON next to each
 raw image records endpoint, size, inputs, full prompt, usage and time. Style reference:
-grimoire_v2/ref/light_magic_reference.png (user's Light Magic image) and its crops.
+grimoire_v2/ref/light_magic_reference.png (user's Light Magic image) and its crops ref_left_page, ref_medallion,
+ref_right_page, ref_tabs, ref_title. These six images are kept locally only (git-ignored) and are not published;
+the per-request JSON files still name them as inputs.
 
 ## APNG origin confirmation
 

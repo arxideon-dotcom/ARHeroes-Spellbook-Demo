@@ -143,3 +143,11 @@ Deliverables/
 *.mov
 *.webm
 *.zip
+
+# The author's old Light Magic image and its crops (style reference input only): local only, not published
+processing/grimoire_v2/ref/light_magic_reference.png
+processing/grimoire_v2/ref/ref_left_page.png
+processing/grimoire_v2/ref/ref_medallion.png
+processing/grimoire_v2/ref/ref_right_page.png
+processing/grimoire_v2/ref/ref_tabs.png
+processing/grimoire_v2/ref/ref_title.png

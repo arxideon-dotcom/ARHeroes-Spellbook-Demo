@@ -137,8 +137,8 @@ processing/  generation, keying and layout scripts, prompts, raw generations, pr
   EB Garamond SemiBold (stat labels).
 - **New work:** the code, scene and processed art were made during the hackathon window (Oct 26 – Nov 4, 2026);
   no artwork, code or scenes from the existing ARHeroes game are used. Exceptions: the Unity URP template files,
-  and the author's Light Magic image (`processing/grimoire_v2/ref/`), a pre-existing image used only as a style
-  reference input.
+  and the author's Light Magic image (`processing/grimoire_v2/ref/`, kept locally and not published), a pre-existing
+  image used only as a style reference input.
 
 ## Submission
 
