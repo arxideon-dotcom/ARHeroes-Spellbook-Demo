@@ -151,3 +151,6 @@ processing/grimoire_v2/ref/ref_medallion.png
 processing/grimoire_v2/ref/ref_right_page.png
 processing/grimoire_v2/ref/ref_tabs.png
 processing/grimoire_v2/ref/ref_title.png
+# Byte copy of ref_right_page.png (old Light Magic crop) used as a trailer plate: local only, not published
+Assets/Spellbook/Trailer/T_Process1_Reference.png
+Assets/Spellbook/Trailer/T_Process1_Reference.png.meta
