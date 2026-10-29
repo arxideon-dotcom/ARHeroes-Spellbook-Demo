@@ -179,6 +179,7 @@ public static class SpellbookSceneBuilder
         WarpPage(left.transform);
         WarpPage(right.transform);
         CreateSelector(player, left, windows, spells);
+        CreateTrailerDirector();
         // Кнопок нет: Ice Storm запускается сам, медальон сразу запускает своё заклинание
 
         EditorSceneManager.MarkSceneDirty(scene);
@@ -189,21 +190,97 @@ public static class SpellbookSceneBuilder
         Debug.Log("[Spellbook] Scene built: " + ScenePath);
     }
 
-    [MenuItem("Spellbook/Build Windows Player")]
-    public static BuildReport BuildWindows()
+    // Постановочный режим для конкурсного видео: в обычном запуске объект сразу удаляет себя
+    // (TrailerDirector включается только флагом -spellbookTrailer или пунктом меню ниже)
+    public const string TrailerFolder = "Assets/Spellbook/Trailer";
+
+    private static void CreateTrailerDirector()
     {
-        Directory.CreateDirectory(Path.GetDirectoryName(BuildPath));
+        var d = new GameObject("TrailerDirector").AddComponent<TrailerDirector>();
+        d.titleFont = PageFont(FontStyle.Bold);
+        d.textFont = PageFont(FontStyle.Normal);
+        d.ribbonRaw = TrailerPlate("T_Ribbon_Raw.png");
+        d.ribbonCleaned = TrailerPlate("T_Ribbon_Parchment.png");
+    }
+
+    // Plates keep their own size and aspect (no power-of-two rescale, no mipmaps)
+    private static Texture2D TrailerPlate(string file)
+    {
+        string path = TrailerFolder + "/" + file;
+        var importer = (TextureImporter)AssetImporter.GetAtPath(path);
+        if (importer != null && (importer.npotScale != TextureImporterNPOTScale.None || importer.mipmapEnabled))
+        {
+            importer.npotScale = TextureImporterNPOTScale.None;
+            importer.mipmapEnabled = false;
+            importer.maxTextureSize = 2048;
+            importer.SaveAndReimport();
+        }
+        return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+    }
+
+    [MenuItem("Spellbook/Play Trailer")]
+    public static void PlayTrailer()
+    {
+        EditorSceneManager.OpenScene(ScenePath, OpenSceneMode.Single);
+        SessionState.SetBool(TrailerDirector.EditorKey, true);
+        EditorApplication.isPlaying = true;
+    }
+
+    [MenuItem("Spellbook/Build Windows Player")]
+    public static BuildReport BuildWindows() => BuildWindowsTo(BuildPath);
+
+    // Публичная сборка в отдельную папку (прежние сборки не трогаются). Trailer/Private (скриншот стороннего
+    // магазина и звук трейлера с неоформленными правами) лежит в Resources и попал бы в любую сборку, поэтому
+    // на время сборки папка скрыта от Unity суффиксом «~» и сразу возвращается на место
+    public const string ReleaseBuildPath = "Builds/Release/v0.1-demo/ARHeroes-Spellbook-Demo/ARHeroes-Spellbook-Demo.exe";
+    public const string PrivateTrailerFolder = TrailerFolder + "/Private";
+
+    [MenuItem("Spellbook/Build Release Player (without Trailer/Private)")]
+    public static BuildReport BuildRelease()
+    {
+        string hidden = PrivateTrailerFolder + "~";
+        string meta = PrivateTrailerFolder + ".meta", hiddenMeta = hidden + "/_folder.meta.keep";
+        if (Directory.Exists(hidden))
+        {
+            Debug.LogError("[Spellbook] " + hidden + " already exists: restore it by hand before a release build");
+            return null;
+        }
+        bool moved = Directory.Exists(PrivateTrailerFolder);
+        if (moved)
+        {
+            Directory.Move(PrivateTrailerFolder, hidden);
+            if (File.Exists(meta)) File.Move(meta, hiddenMeta);
+            AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+        }
+        try
+        {
+            return BuildWindowsTo(ReleaseBuildPath);
+        }
+        finally
+        {
+            if (moved)
+            {
+                if (File.Exists(hiddenMeta)) File.Move(hiddenMeta, meta);
+                Directory.Move(hidden, PrivateTrailerFolder);
+                AssetDatabase.Refresh(ImportAssetOptions.ForceSynchronousImport);
+            }
+        }
+    }
+
+    private static BuildReport BuildWindowsTo(string path)
+    {
+        Directory.CreateDirectory(Path.GetDirectoryName(path));
         var options = new BuildPlayerOptions
         {
             scenes = new[] { ScenePath },
-            locationPathName = BuildPath,
+            locationPathName = path,
             target = BuildTarget.StandaloneWindows64,
             targetGroup = BuildTargetGroup.Standalone,
             options = BuildOptions.None,
         };
         BuildReport report = BuildPipeline.BuildPlayer(options);
         Debug.Log("[Spellbook] Build " + report.summary.result + ", errors: " + report.summary.totalErrors +
-                  ", size: " + report.summary.totalSize + ", path: " + Path.GetFullPath(BuildPath));
+                  ", size: " + report.summary.totalSize + ", path: " + Path.GetFullPath(path));
         return report;
     }
 
@@ -562,7 +639,7 @@ public static class SpellbookSceneBuilder
             tab.preserveAspect = false;
             tab.pixelsPerUnitMultiplier = tongue.rect.width / TabWidth;
             CreateImage("Icon", tab.transform, Ui(icons[i]), new Vector2(0f, iconY - y), new Vector2(70f, 70f),
-                        active ? InkGold : new Color(Ink.r, Ink.g, Ink.b, 0.85f));
+                        active ? InkGold : new Color(Ink.r, Ink.g, Ink.b, 0.72f));
         }
 
         // Заголовок школы — в свободном поле ленты (UI_V2_TitleRibbon, Muse), на той же поверхности листа

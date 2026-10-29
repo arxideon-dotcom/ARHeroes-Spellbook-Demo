@@ -1,0 +1,64 @@
+1
+00:00:02,500 --> 00:00:04,730
+I’m creating a fantasy game on my own.
+
+2
+00:00:04,920 --> 00:00:09,790
+I know the world I want to build, but I don’t have a dedicated art or animation team.
+
+3
+00:00:21,500 --> 00:00:27,050
+Ready-made assets can give me a starting point, but I wanted something that felt like part of my own world.
+
+4
+00:00:35,600 --> 00:00:38,750
+So I started building a living spellbook with Muse.
+
+5
+00:00:39,600 --> 00:00:44,270
+With Muse, I developed the artwork for the book, its decoration, and its spells.
+
+6
+00:00:52,000 --> 00:00:56,430
+Each element was generated, selected, and cleaned before it went onto the page.
+
+7
+00:01:17,000 --> 00:01:20,410
+I mapped every layer to the curvature of the illustrated pages,
+
+8
+00:01:26,000 --> 00:01:29,210
+then added typography, ornaments, and interaction.
+
+9
+00:01:44,500 --> 00:01:47,270
+Muse also created the animated spell sequences.
+
+10
+00:01:51,000 --> 00:01:53,250
+Ice Storm brings the page into motion.
+
+11
+00:02:01,000 --> 00:02:03,190
+Frost Breath reveals an icy dragon.
+
+12
+00:02:09,500 --> 00:02:11,730
+Ice Comet trails frozen energy.
+
+13
+00:02:18,000 --> 00:02:20,970
+Absolute Zero freezes and shatters a knight.
+
+14
+00:02:26,500 --> 00:02:30,150
+This is the working Unity application, running in real time.
+
+15
+00:02:45,500 --> 00:02:49,610
+AI made this visual production achievable without a dedicated art team.
+
+16
+00:02:52,000 --> 00:02:54,650
+I kept control of the world and its presentation.
+

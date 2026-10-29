@@ -1,0 +1,146 @@
+[
+ {
+  "start": 2.5,
+  "end": 4.73,
+  "text": "I’m creating a fantasy game on my own.",
+  "spoken": [
+   2.5,
+   4.38
+  ]
+ },
+ {
+  "start": 4.92,
+  "end": 9.79,
+  "text": "I know the world I want to build, but I don’t have a dedicated art or animation team.",
+  "spoken": [
+   4.92,
+   9.44
+  ]
+ },
+ {
+  "start": 21.5,
+  "end": 27.05,
+  "text": "Ready-made assets can give me a starting point, but I wanted something that felt like part of my own world.",
+  "spoken": [
+   21.5,
+   26.7
+  ]
+ },
+ {
+  "start": 35.6,
+  "end": 38.75,
+  "text": "So I started building a living spellbook with Muse.",
+  "spoken": [
+   35.6,
+   38.4
+  ]
+ },
+ {
+  "start": 39.6,
+  "end": 44.27,
+  "text": "With Muse, I developed the artwork for the book, its decoration, and its spells.",
+  "spoken": [
+   39.6,
+   43.92
+  ]
+ },
+ {
+  "start": 52.0,
+  "end": 56.43,
+  "text": "Each element was generated, selected, and cleaned before it went onto the page.",
+  "spoken": [
+   52.0,
+   56.08
+  ]
+ },
+ {
+  "start": 77.0,
+  "end": 80.41,
+  "text": "I mapped every layer to the curvature of the illustrated pages,",
+  "spoken": [
+   77.0,
+   80.06
+  ]
+ },
+ {
+  "start": 86.0,
+  "end": 89.21,
+  "text": "then added typography, ornaments, and interaction.",
+  "spoken": [
+   86.0,
+   88.86
+  ]
+ },
+ {
+  "start": 104.5,
+  "end": 107.27,
+  "text": "Muse also created the animated spell sequences.",
+  "spoken": [
+   104.5,
+   106.92
+  ]
+ },
+ {
+  "start": 111.0,
+  "end": 113.25,
+  "text": "Ice Storm brings the page into motion.",
+  "spoken": [
+   111.0,
+   112.9
+  ]
+ },
+ {
+  "start": 121.0,
+  "end": 123.19,
+  "text": "Frost Breath reveals an icy dragon.",
+  "spoken": [
+   121.0,
+   122.84
+  ]
+ },
+ {
+  "start": 129.5,
+  "end": 131.73,
+  "text": "Ice Comet trails frozen energy.",
+  "spoken": [
+   129.5,
+   131.38
+  ]
+ },
+ {
+  "start": 138.0,
+  "end": 140.97,
+  "text": "Absolute Zero freezes and shatters a knight.",
+  "spoken": [
+   138.0,
+   140.62
+  ]
+ },
+ {
+  "start": 146.5,
+  "end": 150.15,
+  "text": "This is the working Unity application, running in real time.",
+  "spoken": [
+   146.5,
+   149.8
+  ]
+ },
+ {
+  "start": 165.5,
+  "end": 169.61,
+  "text": "AI made this visual production achievable without a dedicated art team.",
+  "spoken": [
+   165.5,
+   169.26
+  ]
+ },
+ {
+  "start": 172.0,
+  "end": 174.65,
+  "text": "I kept control of the world and its presentation.",
+  "spoken": [
+   172.0,
+   174.3
+  ]
+ }
+]

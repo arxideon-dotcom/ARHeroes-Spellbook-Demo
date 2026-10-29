@@ -112,3 +112,34 @@ InitTestScene*.unity*
 processing/__pycache__/
 processing/**/__pycache__/
 processing/backup_pre_grimoire_v2/
+
+# Third-party store screenshot for the video: local only, not for the public repository
+Assets/Spellbook/Trailer/Private/
+Assets/Spellbook/Trailer/Private.meta
+
+# Creator confirmation screenshots (contain unrelated chat UI): local only
+processing/provenance_private/
+
+# Trailer music: licence/origin not documented yet, local only
+processing/trailer_private/
+
+# Rendered trailer (contains third-party store screenshot and audio with undocumented terms): local only
+Deliverables/
+
+# Keys and local settings: never committed
+.env
+.env.*
+*.key
+*.pem
+*.pfx
+
+# Audio and video are not added automatically (licences, size); add a specific file by hand only if it is cleared
+*.wav
+*.mp3
+*.ogg
+*.m4a
+*.flac
+*.mp4
+*.mov
+*.webm
+*.zip
