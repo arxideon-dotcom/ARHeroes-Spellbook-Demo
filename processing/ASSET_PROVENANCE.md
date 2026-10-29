@@ -2,7 +2,8 @@
 
 Model for every image generated through the API: **muse-image-1.0** (Meta Model API, `https://api.meta.ai/v1/images/generations`
 and `/v1/images/edits`). Python is used only for keying, cleanup, masks, crops, layout and export.
-Text (titles, descriptions, stats, page numbers) is editable Unity text in OFL fonts, not part of any image.
+Text (titles, descriptions, stats, page numbers) is editable Unity text, not part of any image. Fonts in use, all
+SIL OFL 1.1 (licences in Assets/Spellbook/Fonts): IM FELL English SC, IM FELL English Italic, EB Garamond SemiBold.
 
 | Visible element | Sprite / file in Unity | Origin | Prompt / raw source | Processing |
 |---|---|---|---|---|
@@ -10,7 +11,7 @@ Text (titles, descriptions, stats, page numbers) is editable Unity text in OFL f
 | Wooden table | UI/UI_Table.png | Muse /images/generations | processing/ui_prompts.json "UI_Table", processing/muse_ui_v1/UI_Table.png | make_page_frames.py: darken, vignette |
 | Page clipping mask | SheetClip (Mask on every page layer) | code, invisible stencil through PageWarp | — | — |
 | Book contact shadow | UI/UI_BookShadow.png | **code** (make_page_frames.py, blurred silhouette) | — | a shadow, not decoration |
-| Spell animations (4) | Frames/IceStorm_*, FrostBreath_*, IceComet_*, AbsoluteZero_* | Ice Storm: 36-frame APNG loop, see "Animations in the build" below (the creating tool is not recorded in these files). Frost Breath, Ice Comet, Absolute Zero: **Artwork and APNG animation sequences created with Muse; subsequent processing and Unity integration performed for this project. Animation origin confirmed by the creator.** | APNG copies: processing/ice_spells/apng (originals: icedragon-v1, icecomet-v1, frozenknight-shatter). Confirmation: see below | extract_apng.py (compositing, own delays), fix_apng_v1.py (edge fades, ghost haze, green fringe, fade/pause/appear loop), layout_frames_v2.py |
+| Spell animations (4) | Frames/IceStorm_*, FrostBreath_*, IceComet_*, AbsoluteZero_* | Ice Storm: existing 36-frame sequence **created in Meta AI chat, delivered Oct 27 2026 23:33 PT (confirmed by the author; not an API generation)**. Frost Breath, Ice Comet, Absolute Zero: **Artwork and APNG animation sequences created with Muse; subsequent processing and Unity integration performed for this project. Animation origin confirmed by the creator.** | APNG copies: processing/ice_spells/apng (originals: icedragon-v1, icecomet-v1, frozenknight-shatter). Confirmation: see below | extract_apng.py (compositing, own delays), fix_apng_v1.py (edge fades, ghost haze, green fringe, fade/pause/appear loop), layout_frames_v2.py |
 | Medallion thumbnails (4) | UI/UI_Medal{Storm,FrostBreath,IceComet,AbsoluteZero}.png | frames of the animations above | make_medal_thumbs.py | unchanged |
 | Medallion underlays (4) | UI/UI_V2_Under{Storm,FrostBreath,IceComet,AbsoluteZero}.png | **Muse /images/edits** (style ref: reference crop) | grimoire_v2/prompts.json, grimoire_v2/raw/Under*.png/.json | key, sepia recolour, fit to window r 176 |
 | Medallion frames (one sprite x4) | UI/UI_FrameRing.png | Muse /images/generations | ui_prompts.json "UI_FrameRing", muse_ui_v1/UI_FrameRing.png | make_ui_sprites.py |
@@ -42,10 +43,10 @@ LoopPlayer, confirmed by the self-test on the v0.1-demo build (measured loop = l
 | Ice Comet | 36 | 0.11 s | 3.96 s | fix_v1/icecomet-v1_fix_v1.apng | apng/icecomet-v1.apng: 36 frames, 688×699, 0.11 s |
 | Absolute Zero | 45 | 0.12 s, two frames 0.36 s | 5.64 s | fix_v1/frozenknight-shatter_fix_v1.apng | apng/frozenknight-shatter.apng: 40 frames, 700×700, 0.12 s |
 
-Ice Storm source: the Ice Storm frames match, by canvas size (581×658) and frame count (36), an APNG kept outside
-the repository whose local file time is Oct 27 2026, 23:33 PT (the time the file was saved on this machine, not a
-generation time). The repository holds no request record for this sequence; which tool created it is not
-documented here.
+Ice Storm source: the author confirms that this 36-frame sequence was created in Meta AI chat and delivered on
+Oct 27 2026, 23:33 PT; it is not an API generation, so there is no request JSON for it. (Consistent with, but not
+derived from, the local APNG copy: 581×658, 36 frames, 0.11 s.) Frost Breath, Ice Comet and Absolute Zero were
+imported from the provided APNG files and processed in this project.
 
 History, not in the build: commit db6679f (Oct 28 2026) had a 12-frame Ice Storm loop made from the v2 tornado
 still (`muse_book_v1/ice_storm_v2_raw.png`) with muse-image-1.0 `/images/edits`, played at 12 fps. Commit 1d22603
@@ -89,6 +90,7 @@ playback and selection in Unity.
 - `Assets/Spellbook/Trailer/Private/` (git-ignored): crop of the author's screenshot of a third-party Unity Asset
   Store page (Stylized Magic Druid Book – Game Ready Fantasy Spellbook, by Alexander Shmidtheisler), shown only as
   context "Asset Store example". Check the store's terms before publishing the video.
-- Trailer music `the-kingdom-revealed.wav`: provided by the creator; its origin and licence are not documented
-  here. Kept out of Git (`processing/trailer_private/`, `Assets/Spellbook/Trailer/Private/`) until the terms are
-  clear. Edited for length and level by `processing/trailer/make_music.py` (the original copy is unchanged).
+- Trailer audio is video production only, not a demo feature. Voice-over: ElevenLabs TTS. Music in the final cut
+  (`the-menu-knows-your-name.wav`): original music written by the author's wife (confirmed by the author; no public
+  credit added yet). The earlier draft music `the-kingdom-revealed.wav` is no longer used. No audio file is in Git
+  or in the release build (`processing/trailer_private/`, `Assets/Spellbook/Trailer/Private/`, both git-ignored).

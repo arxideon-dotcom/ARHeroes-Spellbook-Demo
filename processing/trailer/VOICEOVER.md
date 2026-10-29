@@ -1,4 +1,4 @@
-# ARHeroes — Living Spellbook: voice-over and shot list (final cut v5, recorded voice)
+# ARHeroes — Living Spellbook: voice-over and shot list (final cut v5, ElevenLabs TTS voice)
 
 Source of truth: `Assets/Spellbook/Scripts/TrailerDirector.cs` (`Sections`, `Cards`, `Captions`, `Voice`, `Reveal`
 and the timing constants). Runs with `-trailerRecord` or `-trailerStills` write `voiceover.srt`; a copy is
@@ -13,6 +13,10 @@ Attribution kept in the text: **Muse** — the artwork (book, decoration, spell 
 sequences (confirmed by the creator; no claim that muse-image-1.0 itself makes video). **The developer** —
 direction, selection, processing and fixes, page geometry, interface and Unity integration. No claims of saved
 time or money.
+
+Audio is trailer production only, not a feature of the demo: the voice-over is ElevenLabs TTS and the music
+is an original composition written by the author's wife (confirmed by the author; no public credit is added yet).
+No audio files are in the repository or in the release build.
 
 The build-up 0:50–1:40 is a reconstruction of the work stages from the scene's real layers and is marked
 "Process reconstruction". Real Muse output is shown only as saved files (the ribbon at 1:03–1:10: cleaned version large, raw output as a small labelled inset).
@@ -29,9 +33,9 @@ The build-up 0:50–1:40 is a reconstruction of the work stages from the scene's
 | 2:25–2:45 | Working product | continuous wide shot, four real-path clicks; "Interactive Unity demo", "Real-time spell selection and playback" |
 | 2:45–3:00 | Finale | wide shot, small pull-back; "ARHeroes — Living Spellbook" / "Built for a solo developer’s world" |
 
-## Recorded voice-over (as spoken; subtitles show from the first to the last word + 0.35 s)
+## Voice-over: ElevenLabs TTS (as spoken; subtitles show from the first to the last word + 0.35 s)
 
-Recordings: `voice_intro.mp3` (16.4 s, phrases 1–4) and `voice_main.mp3` (58.6 s; it repeats the intro and starts
+ElevenLabs TTS files (local only, not in Git): `voice_intro.mp3` (16.4 s, phrases 1–4) and `voice_main.mp3` (58.6 s; it repeats the intro and starts
 with "Welcome!" — only its phrases 5–16 are used, so nothing is doubled). Text and word timings from a local
 speech-recognition pass (`voice_timing.py` → `voice_words.json`; low-confidence words there: "Ready-made",
 "spellbook", "Muse", "Ice Storm", "Ice Comet", "knight" — spelled here as in the script). Cuts only in pauses,
@@ -67,7 +71,8 @@ no speed change (`make_audio.py`).
 
 ## Music and mix
 
-`the-menu-knows-your-name.wav` (provided; origin and terms of use not documented here — local only, not in Git).
+`the-menu-knows-your-name.wav`: original music written by the author's wife (confirmed by the author); local only,
+not in Git.
 204.8 s; the first 180 s are used, no splice; fade-in 1.5 s, fade-out over the last 3.5 s. Music bed −27 dBFS RMS,
 −10 dB under every phrase (down 0.6–0.25 s before the first word, back 0.3–1.2 s after the last); voice −25.5 dBFS
 RMS; mix peak −3.8 dBFS. One file `Assets/Spellbook/Trailer/Private/Resources/TrailerAudio.wav` drives both the

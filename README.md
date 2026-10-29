@@ -7,14 +7,14 @@ stops the previous spell and starts the selected one from its first frame.
 
 - **Windows build:** [v0.1-demo release](https://github.com/arxideon-dotcom/ARHeroes-Spellbook-Demo/releases/tag/v0.1-demo)
   (`ARHeroes-Spellbook-Demo-v0.1-demo-Windows-x64.zip`)
-- **Demo video:** TODO — link will be added by the author.
+- **Demo video:** https://www.youtube.com/watch?v=AgeCmKbe4a0
 
 ## The idea: problem → work with Meta → result
 
 - **Problem.** A solo indie developer with no art team needs a living, animated spellbook for a fantasy strategy
   game — art that moves, not static pictures.
 - **Work with Meta.** The book, its decoration and the spell artwork were made with Meta's Muse, and the spell
-  animation sequences were created with Muse; everything was then cleaned, looped and laid out by this project's
+  animation sequences were created with Muse and Meta AI chat; everything was then cleaned, looped and laid out by this project's
   own pipeline (below) and placed into a working Unity application.
 - **Result.** A playable book: four looping spell animations drawn on the curved page surface, selected by
   clicking the medallions — not a video of an effect.
@@ -48,10 +48,12 @@ All animations play in Unity from transparent PNG frames with their own frame ti
 | Ice Comet | 36 | 0.11 s per frame | 3.96 s | A frozen comet streaks through the air, trailing ice shards. |
 | Absolute Zero | 45 | 0.12 s per frame, two frames 0.36 s | 5.64 s | Extreme cold freezes a knight until the figure shatters. |
 
-Frost Breath, Ice Comet and Absolute Zero are the processed versions from `processing/ice_spells/fix_v1/`. Their
-source APNGs have 36 frames at 0.11 s, 36 frames at 0.11 s and 40 frames at 0.12 s; the extra frames and longer
-holds are the fade-out / pause / fade-in loop seams added here. Ice Storm comes from a 36-frame APNG (0.11 s per
-frame, 581×658) with the green spill removed and a 3-frame crossfade at the loop seam. The stat row (Mana, Power,
+Frame counts and timings are those of the v0.1-demo build (measured by the self-test). **Ice Storm** is the
+existing 36-frame sequence (created in Meta AI chat, see below), with the green spill removed and a 3-frame
+crossfade at the loop seam. **Frost Breath, Ice Comet and Absolute Zero** were imported from the provided APNG
+files and processed here (`processing/ice_spells/fix_v1/`): their sources have 36 frames at 0.11 s, 36 frames at
+0.11 s and 40 frames at 0.12 s; the extra frames and longer holds in the build are the fade-out / pause / fade-in
+loop seams added in this project. The stat row (Mana, Power,
 Duration, Range) reads **Not set**: the demo has no gameplay numbers.
 
 ## Built with Meta — and what was done in this project
@@ -61,8 +63,9 @@ Duration, Range) reads **Not set**: the demo has no gameplay numbers.
   (frames, ribbons, tabs, glyphs, stat icons, ornaments, medallion underlays, page drawings, glows). Prompts and
   raw results are kept in `processing/`; for the decoration pass there is a JSON per request (model, endpoint,
   inputs, prompt, time).
-- **Animation sequences with Muse:** the APNG sequences of Frost Breath, Ice Comet and Absolute Zero were created
-  with Muse (confirmed by the creator). `muse-image-1.0` itself returns still images; how Muse assembled the
+- **Animation sequences:** the 36-frame Ice Storm sequence was created in Meta AI chat and delivered on Oct 27
+  2026, 23:33 PT (confirmed by the author; not an API generation). The APNG sequences of Frost Breath, Ice Comet
+  and Absolute Zero were created with Muse (confirmed by the creator). `muse-image-1.0` itself returns still images; how Muse assembled the
   sequences is not documented here and is not claimed. The medallion thumbnails of these three spells are frames
   of their own APNGs, not separate generations.
 - **Done by the developer in this project:** creative direction and selection; keying and cleanup; APNG
@@ -139,6 +142,6 @@ processing/  generation, keying and layout scripts, prompts, raw generations, pr
 
 ## Submission
 
-- Demo video (about 3 min) — TODO: link.
+- Demo video (about 3 min): https://www.youtube.com/watch?v=AgeCmKbe4a0
 - Cerebral Valley submission — TODO: link.
 - Author: Remelt Games (Arxideon), solo, Indie track, "Build for Your World".
