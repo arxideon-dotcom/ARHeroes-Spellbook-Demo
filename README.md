@@ -143,5 +143,5 @@ processing/  generation, keying and layout scripts, prompts, raw generations, pr
 ## Submission
 
 - Demo video (about 3 min): https://www.youtube.com/watch?v=AgeCmKbe4a0
-- Cerebral Valley submission — TODO: link.
+- Cerebral Valley submission: submitted Oct 29, 2026 (Meta Global AI Developer Hackathon, Indie track, team Remelt Games) via the Cerebral Valley portal: https://cerebralvalley.ai/e/meta-ai-developer-hackathon
 - Author: Remelt Games (Arxideon), solo, Indie track, "Build for Your World".
